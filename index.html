@@ -21,8 +21,8 @@
   .clock{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--gold-soft);}
   .parkstat{font-size:12px;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,.12);}
   .parkstat.open{background:rgba(46,125,91,.35);} .parkstat.closed{background:rgba(192,57,43,.35);}
-  .tabs{display:flex;gap:6px;margin-top:12px;}
-  .tab{flex:1;text-align:center;padding:8px 4px;border-radius:10px;font-size:13px;background:rgba(255,255,255,.08);color:var(--paper);border:1px solid transparent;cursor:pointer;transition:.15s;user-select:none;}
+  .tabs{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
+  .tab{flex:1 1 0;min-width:74px;text-align:center;padding:8px 4px;border-radius:10px;font-size:12.5px;background:rgba(255,255,255,.08);color:var(--paper);border:1px solid transparent;cursor:pointer;transition:.15s;user-select:none;}
   .tab .d{font-size:11px;opacity:.65;display:block;}
   .tab.active{background:var(--gold);color:var(--ink);font-weight:700;border-color:var(--gold-soft);}
   .tab.active .d{opacity:.75;}
@@ -123,6 +123,34 @@
   .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:9px 18px;border-radius:20px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:99;white-space:nowrap;display:flex;gap:12px;align-items:center;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
   .toast .tact{color:var(--gold-soft);font-weight:700;cursor:pointer;text-decoration:underline;}
+  .npc-sec{margin:18px 0 9px;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;}
+  .npc-sec .cnt{font-size:11px;background:var(--ink);color:var(--paper);border-radius:20px;padding:2px 9px;font-weight:600;}
+  .npc-sec.hot .cnt{background:var(--verm);}
+  .npc-sec.stage .cnt{background:var(--gold);color:var(--ink);}
+  .npc-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:11px 13px;margin-bottom:9px;border-left:4px solid var(--verm);position:relative;}
+  .npc-card.stage{border-left-color:var(--gold);}
+  .npc-card.game{border-left-color:var(--jade);}
+  .npc-card.hidden{border-left-color:#8b7d64;}
+  .npc-card .nh{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;}
+  .npc-card .nn{font-weight:800;font-size:14.5px;flex:1;color:var(--ink);}
+  .npc-card .nstars{color:var(--gold);font-size:12px;letter-spacing:.5px;}
+  .npc-card .ntags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;}
+  .npc-card .ntag{font-size:10.5px;padding:2px 8px;border-radius:11px;background:#f5ecdb;color:#8b6d2f;font-weight:600;}
+  .npc-card .ntag.loc{background:#eaf0f5;color:#5b7d99;}
+  .npc-card .ntag.time{background:#fde7e3;color:var(--verm);}
+  .npc-card .ntag.hot{background:var(--verm);color:#fff;}
+  .npc-card .ntag.stage{background:var(--gold);color:var(--ink);}
+  .npc-card .ntips{font-size:12.5px;color:var(--ink-soft);line-height:1.65;}
+  .npc-card .ntips div{padding:1px 0;}
+  .npc-card .ntips b{color:var(--ink);}
+  .npc-card .warn{color:var(--verm);font-weight:600;}
+  .npc-tipbox{background:#fff8e6;border:1px dashed var(--gold-soft);border-radius:var(--radius);padding:11px 13px;margin-bottom:12px;font-size:12.5px;color:#7a6531;line-height:1.7;}
+  .npc-tipbox .th{color:var(--gold);font-weight:700;margin-bottom:4px;font-size:13px;}
+  .subtabs{display:flex;gap:5px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .subtabs::-webkit-scrollbar{display:none;}
+  .subtab{flex-shrink:0;padding:6px 12px;border-radius:16px;font-size:12.5px;background:var(--card);border:1px solid var(--line);color:var(--ink-soft);cursor:pointer;user-select:none;transition:.15s;font-weight:600;white-space:nowrap;}
+  .subtab.active{background:var(--verm);color:#fff;border-color:var(--verm);}
+  .subtab .badge{font-size:10.5px;opacity:.75;margin-left:3px;}
 </style>
 </head>
 <body>
@@ -156,14 +184,9 @@
     </div>
   </div>
   <div id="wishOnly" style="display:none">
-    <div class="sec">💗 我的心愿清单 <span class="cnt" id="wishCnt">0</span></div>
-    <div id="wishBox"></div>
-    <div class="hint">
-      清单贯穿三天，默认收录 4 星以上；在「DAY」页行程行点 ♡ 可增删。<br/>
-      场次 chip：绿=看过 · 划线=已跳过（点按恢复）· 半透明=已结束 · 虚线=未来天。<br/>
-      点任意一天的 chip = 跳过/恢复该场，用于当天或跨天微调；跳过后当天必看提醒不再催它。<br/>
-      清单与进度都只保存在你自己手机上。
-    </div>
+    <div class="subtabs" id="wishSubTabs"></div>
+    <div id="wishPane"></div>
+    <div id="npcPane" style="display:none"></div>
   </div>
 </div>
 
@@ -207,7 +230,7 @@ const DAYS = [
   {key:"d2",label:"DAY 2",date:"10/31",dow:"周六 全天",items:[
     {id:"d2-1",t:"09:00",e:"09:35",name:"飞跃清明上河图",sn:"飞跃清明上河图",show:"feiyue",loc:"球幕影院",star:5,cat:"show",prep:45,note:"裸眼3D 8分钟 · ⚠️第一批冲排45-60分钟 · 选第4排中间"},
     {id:"d2-2",t:"09:40",e:"10:00",name:"包公漕运",sn:"包公漕运",show:"baogong",loc:"虹桥两侧水面",star:3,cat:"show",note:"真人高空跳水 · 站桥西南岸不用上桥"},
-    {id:"d2-3",t:"10:00",e:"10:40",name:"东京保卫战",sn:"东京保卫战",show:"baowei",loc:"九龙桥西南水面",star:5,cat:"show",prep:40,note:"炮火+水柱感染力极强 · ⚠️提前40分钟 · 假山镇视角最全"},
+    {id:"d2-3",t:"10:00",e:"10:40",name:"东京保卫战",sn:"东京保卫战",show:"baowei",loc:"九龙桥西南水面",star:5,cat:"show",prep:40,note:"炮火+水柱感染力极强 · ⚠️提前40分钟 · 假山镇视角最全 · 开演前金贼在九龙桥热场可互动"},
     {id:"d2-4",t:"10:50",e:"11:20",name:"岳飞枪挑小梁王",sn:"岳飞枪挑小梁王",show:"yuefei",loc:"大宋校场",star:3,cat:"show",prep:30,note:"看过Day1可跳过 · 东侧看台有树荫"},
     {id:"d2-5",t:"11:40",e:"12:05",name:"宋廷梦乐",sn:"宋廷梦乐",show:"songting",loc:"宣德殿",star:3,cat:"show",prep:10,note:"现场乐器+科班舞蹈 · 室内有空调 · 座位有限提前10分钟"},
     {id:"d2-5b",t:"11:50",e:"12:15",name:"杨门女将(上午场)",sn:"杨门女将",show:"yangmen",loc:"东京梦华舞台",star:2,cat:"show",note:"一天两场之一(下午场14:50) · 看过可跳过"},
@@ -233,7 +256,7 @@ const DAYS = [
     {id:"d3-3",t:"10:00",e:"10:35",name:"东京保卫战",sn:"东京保卫战",show:"baowei",loc:"九龙桥西南水面",star:3,cat:"show",prep:15,note:"看过可跳过 · 提前15分钟"},
     {id:"d3-4",t:"10:40",e:"11:15",name:"斗鸡+耍猴",sn:"斗鸡+耍猴",show:"douji",loc:"大师坊/勾栏瓦肆",star:2,cat:"show",note:"民俗绝活 · 松弛休息"},
     {id:"d3-4b",t:"10:50",e:"11:20",name:"岳飞枪挑小梁王(上午场)",sn:"岳飞枪挑小梁王",show:"yuefei",loc:"大宋校场",star:3,cat:"show",prep:30,note:"一天两场之一 · ⚠️提前30分钟 · 东侧看台中间靠后"},
-    {id:"d3-5",t:"11:20",e:"11:45",name:"王员外招婿",loc:"王员外家门口",star:2,cat:"npc",note:"⚠️穿红衣易被选中 · 想互动就穿红"},
+    {id:"d3-5",t:"11:20",e:"11:45",name:"王员外招婿",loc:"王员外家门口",star:2,cat:"npc",note:"🎤可上台互动 · ⚠️穿红衣易被选中当女婿 · 选中给很多交子+撒喜糖"},
     {id:"d3-6",t:"11:50",e:"12:25",name:"补漏体验(飞跃/皇家乐园)",loc:"球幕影院",star:4,cat:"exp",note:"二刷球幕 · 人少体验好"},
     {id:"d3-7",t:"12:30",e:"13:00",name:"午饭+拍照",loc:"东京食坊",star:2,cat:"food",note:"人少出片好时机"},
     {id:"d3-8",t:"13:00",e:"15:20",name:"查漏补缺·自由逛",loc:"主街",star:2,cat:"exp",note:"逛店/补NPC/拍照"},
@@ -244,7 +267,46 @@ const DAYS = [
 const LS_KEY = "qshpark_checkin_v2";
 // 心愿清单默认收录：4星及以上剧目/体验（按 show key 或 solo:id）
 const DEFAULT_WISH = ["menghua","tietua","fengwu","feiyue","baowei","yudeng","yancheng","yuefei","huangjia"];
-let state = { checked:{}, skipped:{}, wish:{}, wishInit:false, dayIdx:0, view:"day", filter:"all", locOverride:null };
+
+// NPC 与互动演出数据（合并进「💗 心愿」TAB，用子切换分类浏览）
+const NPC_DATA = {
+  star:[ // 高人气明星NPC
+    {name:"展昭", hot:true, star:5, tags:["颜值担当·控场王"], loc:"清明文化广场 / 皇家乐园", time:"鱼灯巡游 18:20 · 皇家乐园巡逻 16:30", tips:["合影互动，女生缘极强，夜场鱼灯下最帅","Day1 / Day2 都能遇到，重点追的对象"]},
+    {name:"簪花郎·铜铜", hot:true, star:4, tags:["书生风·笑起来甜"], loc:"上善门 → 主街沿线（书生巡游）", time:"下午约 17:20", tips:["红色古装，能对上诗词会多给交子","女生追得最凶的 NPC 之一"]},
+    {name:"金贼 / 金国将军", hot:true, star:4, tags:["热场王·搞笑担当"], loc:"九龙桥（东京保卫战前）+ 上善门", time:"演出前半小时热场 · 下午约 16:30", tips:["腰间挂银票，趁不注意可以直接抢","拉人上台做游戏，举手被选就能上","抖音 2 万粉级别，小朋友最爱"]},
+    {name:"范仲淹 / 欧阳修", star:3, tags:["才子型·傲娇挂"], loc:"四方院 / 主街", time:"下午滚动出现", tips:["对诗对得好会给交子，傲娇性格很有趣","范仲淹小公举性格，被夸会害羞"]}
+  ],
+  stage:[ // 可以上台的互动演出
+    {name:"决战汴梁城·跟着岳飞打金贼", stage:true, star:5, loc:"上善门城楼", time:"下午约 16:30", tips:["直接冲上台和金贼对战、扔石头","<b>想上台就站在铁链前面</b>，到时候往前冲","男生参演体验感拉满"]},
+    {name:"王员外招婿", stage:true, star:4, loc:"王员外家门口（虹桥附近）", time:"上午约 11:45 · 下午也有场", tips:["<span class='warn'>⚠️ 穿红色容易被选中当女婿</span>","选中给很多交子 + 撒喜糖"]},
+    {name:"大宋歌王 / 大宋舞王", stage:true, star:3, loc:"音乐广场 / 主街舞台", time:"下午滚动", tips:["有才艺直接上台，一次能赚大量交子","E 人的舒适区，社恐慎入"]},
+    {name:"大宋招兵买马", stage:true, star:3, loc:"四方院", time:"中午约 12:40", tips:["举手被选中参与互动","简单小游戏，赢交子"]},
+    {name:"拍卖会 / 当铺", star:3, loc:"主街当铺", time:"全天", tips:["可以从酒店带小东西来典当换交子","茶包、笔、小物件都行"]}
+  ],
+  game:[ // 赚交子小游戏
+    {name:"背宋词", star:5, loc:"四方院", time:"全天", tips:["效率最高，一首换 3-5 张交子"]},
+    {name:"你比划我来猜", star:4, loc:"主街摊位", time:"全天", tips:["最快乐，i 人也能玩"]},
+    {name:"明察秋毫 / 找不同", star:4, loc:"四方院附近", time:"全天", tips:["i 人友好"]},
+    {name:"投壶", star:3, loc:"皇家乐园内", time:"全天", tips:["全中拿 5 张，1 个交子入场"]},
+    {name:"猜歌名 / 猜成语 / 对诗", star:3, loc:"各处散落摊位", time:"全天", tips:["随缘遇到就玩"]},
+    {name:"筷子夹弹珠 / 摸麻将 / 套圈", star:2, loc:"四方院 / 主街", time:"全天", tips:["有输有赢，图个乐"]},
+    {name:"渔樵篓趣 / 变戏法", star:0, bad:true, loc:"园内摊位", time:"全天", tips:["<span class='warn'>❌ 不划算：要先交钱，大概率赔</span>"]}
+  ],
+  hidden:[ // 隐藏NPC
+    {name:"卖货郎 / 捕快 / 算命先生", star:2, loc:"主街溜达", tips:["主动搭话就能互动"]},
+    {name:"师爷（县衙）", star:3, loc:"县衙", tips:["判案互动，被选上台当『大人』"]},
+    {name:"如花（喜剧NPC）", star:3, loc:"小御街附近", tips:["出手大方"]},
+    {name:"乞丐帮", star:3, loc:"迎宾门", tips:["借丐服（押金 300）沿街互动","对 NPC 撒泼打滚都能赚交子，E 人天堂"]}
+  ]
+};
+const NPC_TABS = [
+  {key:"wish", label:"💗 心愿", cls:""},
+  {key:"star", label:"🔥 明星NPC", cls:"hot"},
+  {key:"stage", label:"🎤 上台互动", cls:"stage"},
+  {key:"game", label:"🎯 赚交子", cls:""},
+  {key:"hidden", label:"👻 隐藏NPC", cls:""}
+];
+let state = { checked:{}, skipped:{}, wish:{}, wishInit:false, dayIdx:0, view:"day", filter:"all", locOverride:null, wishSub:"wish" };
 try{ const s = JSON.parse(localStorage.getItem(LS_KEY)); if(s){ if(s.checked)state.checked=s.checked; if(s.skipped)state.skipped=s.skipped; if(s.wish)state.wish=s.wish; if(s.wishInit)state.wishInit=true; } }catch(e){}
 if(!state.wishInit){ DEFAULT_WISH.forEach(k=>state.wish[k]=1); state.wishInit=true; save(); }
 // 旧版迁移：皇家乐园互动由独立项改为剧目 huangjia
@@ -374,7 +436,7 @@ function renderTabs(){
   const seenN=tripGroups().filter(g=>state.wish[g.key]&&g.sessions.some(s=>isChecked(s.id))).length;
   const w=document.createElement("div");
   w.className="tab"+(state.view==="wish"?" active":"");
-  w.innerHTML=`💗 心愿<span class="d">贯穿三天</span><span class="prog">${seenN}/${wishN}</span>`;
+  w.innerHTML=`💗 心愿 · NPC<span class="d">清单/互动指南</span><span class="prog">${seenN}/${wishN}</span>`;
   w.onclick=()=>{state.view="wish";render();};
   box.appendChild(w);
 }
@@ -530,13 +592,60 @@ function tripGroups(){
 }
 function wishKey(it){ return it.show||("solo:"+it.id); }
 function toggleWish(k){ if(state.wish[k]) delete state.wish[k]; else state.wish[k]=1; save(); render(); }
+function setWishSub(k){ state.wishSub=k; render(); }
+function renderWishSubTabs(){
+  const box=document.getElementById("wishSubTabs"); if(!box) return;
+  box.innerHTML="";
+  NPC_TABS.forEach(t=>{
+    const el=document.createElement("div");
+    el.className="subtab"+(state.wishSub===t.key?" active":"");
+    el.textContent=t.label;
+    el.onclick=()=>setWishSub(t.key);
+    box.appendChild(el);
+  });
+}
+function npcCard(d, cls){
+  let tags="";
+  (d.tags||[]).forEach(t=>{ tags+='<span class="ntag">'+t+'</span>'; });
+  if(d.loc) tags+='<span class="ntag loc">📍'+d.loc+'</span>';
+  if(d.time) tags+='<span class="ntag time">⏰'+d.time+'</span>';
+  if(d.hot) tags+='<span class="ntag hot">🔥必追</span>';
+  if(d.stage) tags+='<span class="ntag stage">🎤可上台</span>';
+  let tips="";
+  (d.tips||[]).forEach(t=>{ tips+="<div>💡 "+t+"</div>"; });
+  const starTxt=d.star>0?('<span class="nstars">'+stars(d.star)+'</span>'):(d.bad?'<span class="nstars" style="color:#b9b0a2">不推荐</span>':'');
+  return '<div class="npc-card '+cls+'">'
+    +'<div class="nh"><span class="nn">'+d.name+'</span>'+starTxt+'</div>'
+    +(tags?'<div class="ntags">'+tags+'</div>':'')
+    +(tips?'<div class="ntips">'+tips+'</div>':'')
+    +'</div>';
+}
+function renderNPC(){
+  const pane=document.getElementById("npcPane"); if(!pane) return;
+  const sub=state.wishSub;
+  const list=NPC_DATA[sub]||[];
+  const titles={star:"🔥 高人气明星NPC",stage:"🎤 可以上台的互动演出",game:"🎯 赚交子的互动小游戏",hidden:"👻 路上随机遇到的隐藏NPC"};
+  const cls={star:"",stage:"stage",game:"game",hidden:"hidden"}[sub]||"";
+  let html='<div class="npc-sec '+({"star":"hot","stage":"stage"}[sub]||"")+'">'+(titles[sub]||"")+' <span class="cnt">'+list.length+'</span></div>';
+  list.forEach(d=>{ html+=npcCard(d,cls); });
+  pane.innerHTML=html;
+}
 function renderWish(){
   const now=nowMin();
+  renderWishSubTabs();
+  const wishPane=document.getElementById("wishPane");
+  const npcPane=document.getElementById("npcPane");
+  if(state.wishSub!=="wish"){
+    wishPane.style.display="none"; npcPane.style.display=""; renderNPC(); return;
+  }
+  wishPane.style.display=""; npcPane.style.display="none";
   const groups=tripGroups().filter(g=>state.wish[g.key]);
-  const box=document.getElementById("wishBox");
   const seenN=groups.filter(g=>g.sessions.some(s=>isChecked(s.id))).length;
-  document.getElementById("wishCnt").textContent=`${seenN}/${groups.length} 已达成`;
-  if(!groups.length){ box.innerHTML=`<div class="empty">清单是空的～在行程列表点 ♡ 收藏想去的项目</div>`; return; }
+  let head='<div class="sec">💗 我的心愿清单 <span class="cnt">'+seenN+'/'+groups.length+' 已达成</span></div>';
+  if(!groups.length){
+    wishPane.innerHTML=head+'<div class="empty">清单是空的～在行程列表点 ♡ 收藏想去的项目</div>'+wishHint();
+    return;
+  }
   // 排序：未去且有剩余场次 > 已达成 > 全错过
   const rows=groups.map(g=>{
     const seen=g.sessions.some(s=>isChecked(s.id));
@@ -562,7 +671,16 @@ function renderWish(){
         <span class="hbtn on" title="从清单移除" onclick="toggleWish('${g.key}')">♥</span></div>
       <div class="ws">${chips}</div></div>`;
   });
-  box.innerHTML=html;
+  wishPane.innerHTML=head+html+wishHint();
+}
+function wishHint(){
+  return '<div class="hint">'
+    +'清单贯穿三天，默认收录 4 星以上；在「DAY」页行程行点 ♡ 可增删。<br/>'
+    +'场次 chip：绿=看过 · 划线=已跳过（点按恢复）· 半透明=已结束 · 虚线=未来天。<br/>'
+    +'点任意一天的 chip = 跳过/恢复该场，用于当天或跨天微调；跳过后当天必看提醒不再催它。<br/>'
+    +'顶部子标签可切换到 🔥明星NPC / 🎤上台互动 / 🎯赚交子 / 👻隐藏NPC 指南。<br/>'
+    +'清单与进度都只保存在你自己手机上。'
+    +'</div>';
 }
 function renderSkipSummary(){
   const box=document.getElementById("skipSummary");
@@ -605,7 +723,7 @@ resetBtn.onclick=()=>{
 
 render();
 setInterval(()=>{renderClock();renderReco();renderMust();renderTimeline();},30000);
-window.__QA={DAYS,state,recommend,laterSession,missedSessions,showGroups,groupStatus,itemStatus,toggle,toggleSkip,skipGroup,render,tripGroups,toggleWish,renderWish,
+window.__QA={DAYS,state,recommend,laterSession,missedSessions,showGroups,groupStatus,itemStatus,toggle,toggleSkip,skipGroup,render,tripGroups,toggleWish,renderWish,NPC_DATA,setWishSub,
   setDay(i){state.dayIdx=i;render();}, setNow(m){window.__FAKE_NOW=m;render();}, clearNow(){window.__FAKE_NOW=null;render();}};
 </script>
 </body>
