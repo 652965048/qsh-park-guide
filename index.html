@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>清明上河园 · 个人游园助手</title>
+<style>
+  :root{
+    --ink:#2b2118; --ink-soft:#6b5d4f; --paper:#f7f1e6; --card:#fffdf8;
+    --verm:#c0392b; --verm-soft:#e8574a; --gold:#b8860b; --gold-soft:#e0b64a;
+    --jade:#2e7d5b; --line:#e6dccb; --shadow:0 2px 10px rgba(90,70,40,.10); --radius:14px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--paper);color:var(--ink);line-height:1.5;padding-bottom:96px;max-width:520px;margin:0 auto;}
+  .hero{background:var(--ink);color:var(--paper);padding:18px 18px 14px;position:sticky;top:0;z-index:30;border-bottom:3px solid var(--gold);}
+  .hero h1{margin:0;font-size:19px;letter-spacing:.5px;display:flex;align-items:center;gap:8px;}
+  .hero .sub{font-size:12px;opacity:.7;margin-top:3px;}
+  .clockrow{display:flex;align-items:baseline;gap:10px;margin-top:10px;}
+  .clock{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--gold-soft);}
+  .parkstat{font-size:12px;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,.12);}
+  .parkstat.open{background:rgba(46,125,91,.35);} .parkstat.closed{background:rgba(192,57,43,.35);}
+  .tabs{display:flex;gap:6px;margin-top:12px;}
+  .tab{flex:1;text-align:center;padding:8px 4px;border-radius:10px;font-size:13px;background:rgba(255,255,255,.08);color:var(--paper);border:1px solid transparent;cursor:pointer;transition:.15s;user-select:none;}
+  .tab .d{font-size:11px;opacity:.65;display:block;}
+  .tab.active{background:var(--gold);color:var(--ink);font-weight:700;border-color:var(--gold-soft);}
+  .tab.active .d{opacity:.75;}
+  .tab .prog{font-size:10px;opacity:.85;display:block;margin-top:1px;}
+  .wrap{padding:14px;}
+  .reco{background:var(--card);border:2px solid var(--verm);border-radius:var(--radius);padding:14px 15px;margin-bottom:14px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+  .reco::before{content:"下一站";position:absolute;top:0;right:0;background:var(--verm);color:#fff;font-size:11px;padding:3px 12px;border-bottom-left-radius:10px;letter-spacing:1px;}
+  .reco .rt{font-size:12px;color:var(--ink-soft);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+  .reco .rn{font-size:20px;font-weight:800;color:var(--verm);margin-bottom:2px;}
+  .reco .rmeta{font-size:13px;color:var(--ink-soft);}
+  .reco .rstars{color:var(--gold);letter-spacing:1px;}
+  .reco .rwhy{margin-top:9px;font-size:12.5px;background:#fdf3ef;border-radius:9px;padding:8px 10px;color:#8a3b2f;border-left:3px solid var(--verm-soft);}
+  .reco .rcta{margin-top:11px;display:flex;gap:8px;}
+  .btn{flex:1;text-align:center;padding:9px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink-soft);transition:.15s;user-select:none;}
+  .btn.primary{background:var(--verm);color:#fff;border-color:var(--verm);}
+  .btn:active{transform:scale(.97);}
+  .gap{background:#fff8e6;border:1px dashed var(--gold-soft);border-radius:var(--radius);padding:11px 13px;margin-bottom:14px;font-size:13px;}
+  .gap .gh{color:var(--gold);font-weight:700;font-size:12.5px;margin-bottom:5px;}
+  .gap .gi{padding:5px 0;border-top:1px solid #f0e4c4;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  .gap .gi:first-of-type{border-top:none;}
+  .gap .gi .nm{font-weight:600;} .gap .gi .ds{font-size:11px;color:var(--ink-soft);}
+  .mini-check{font-size:11px;padding:3px 9px;border-radius:14px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;white-space:nowrap;}
+  .mini-check.done{background:var(--jade);color:#fff;border-color:var(--jade);}
+  .sec{display:flex;align-items:center;gap:8px;margin:18px 0 9px;font-size:15px;font-weight:700;}
+  .sec .cnt{font-size:11px;background:var(--ink);color:var(--paper);border-radius:20px;padding:2px 9px;font-weight:600;}
+  .sec.warn .cnt{background:var(--verm);}
+  .must{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:10px;border-left:4px solid var(--gold);}
+  .must.soon{border-left-color:var(--verm);} .must.missed{border-left-color:#b9b0a2;opacity:.7;}
+  .must .mh{display:flex;align-items:center;gap:8px;padding:11px 13px 4px;}
+  .must .mname{font-weight:700;font-size:15px;flex:1;}
+  .must .mstars{color:var(--gold);font-size:13px;}
+  .must .tag{font-size:10.5px;padding:2px 8px;border-radius:12px;font-weight:600;white-space:nowrap;}
+  .tag.soon{background:#fde7e3;color:var(--verm);} .tag.wait{background:#e9f2ec;color:var(--jade);} .tag.missed{background:#eee9e0;color:#8b8272;}
+  .must .mb{padding:0 13px 11px;font-size:12.5px;color:var(--ink-soft);}
+  .must .mb .row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
+  .must .mb .row span b{color:var(--ink);font-weight:600;}
+  .must .mact{display:flex;gap:8px;padding:0 13px 11px;}
+  .must .mact .btn{padding:6px;font-size:12px;}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .chip{font-size:12px;padding:5px 12px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);cursor:pointer;user-select:none;}
+  .chip.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .tl{list-style:none;margin:0;padding:0;}
+  .item{display:flex;gap:10px;align-items:flex-start;background:var(--card);border-radius:12px;padding:11px 12px;margin-bottom:8px;box-shadow:0 1px 4px rgba(90,70,40,.06);border:1px solid transparent;transition:.15s;cursor:pointer;position:relative;}
+  .item.done{background:#f1f6f2;border-color:#d7e6db;}
+  .item.done .iname,.item.done .inote{opacity:.55;text-decoration:line-through;}
+  .item.skipped{background:#f4f1ec;border-style:dashed;border-color:#d8d0c2;}
+  .item.skipped .iname,.item.skipped .inote{opacity:.45;text-decoration:line-through;}
+  .item.past{opacity:.55;}
+  .item.now{border-color:var(--verm);box-shadow:0 0 0 2px rgba(192,57,43,.12);}
+  .item .time{font-size:13px;font-weight:700;color:var(--verm);min-width:44px;font-variant-numeric:tabular-nums;padding-top:1px;}
+  .item.done .time{color:var(--jade);} .item.skipped .time{color:#9a9184;}
+  .item .body{flex:1;min-width:0;}
+  .item .iname{font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .item .istars{color:var(--gold);font-size:11px;letter-spacing:.5px;}
+  .item .badge{font-size:9.5px;padding:1px 6px;border-radius:8px;background:#f0e9db;color:#8b7d64;font-weight:600;}
+  .item .badge.loc{background:#eaf0f5;color:#5b7d99;}
+  .item .badge.now{background:var(--verm);color:#fff;}
+  .item .badge.skip{background:#e5e0d6;color:#7a7264;}
+  .item .badge.alt{background:#fdf0e0;color:#a06a1c;}
+  .item .inote{font-size:12px;color:var(--ink-soft);margin-top:3px;}
+  .item .acts{display:flex;flex-direction:row;gap:6px;align-items:center;align-self:center;flex-shrink:0;}
+  .item .chk{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;background:#fff;transition:.15s;}
+  .item.done .chk{background:var(--jade);border-color:var(--jade);}
+  .skipbtn{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);background:#fff;color:#a89e8e;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;line-height:1;}
+  .item.skipped .skipbtn{background:#8b8272;color:#fff;border-color:#8b8272;}
+  .skipbox{background:#f4f1ec;border:1px dashed #d8d0c2;border-radius:var(--radius);padding:11px 13px;}
+  .skipbox .sh{font-size:12.5px;font-weight:700;color:#7a7264;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;}
+  .skipbox .sh .all{font-size:11px;font-weight:600;color:var(--jade);cursor:pointer;text-decoration:underline;}
+  .skipbox .si{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-top:1px solid #e8e2d6;font-size:12.5px;}
+  .skipbox .si:first-of-type{border-top:none;}
+  .skipbox .si .t{color:#9a9184;font-variant-numeric:tabular-nums;margin-right:6px;}
+  .skipbox .si .rb{font-size:11px;padding:3px 10px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;white-space:nowrap;}
+  .wish{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:10px 12px;margin-bottom:8px;border-left:4px solid var(--verm-soft);}
+  .wish.seen{border-left-color:var(--jade);}
+  .wish.missed{border-left-color:#b9b0a2;opacity:.72;}
+  .wish .wh{display:flex;align-items:center;gap:8px;}
+  .wish .wn{font-weight:700;font-size:14.5px;flex:1;}
+  .wish .wst{font-size:10.5px;padding:2px 8px;border-radius:12px;font-weight:600;white-space:nowrap;}
+  .wst.seen{background:#e9f2ec;color:var(--jade);} .wst.open{background:#fde7e3;color:var(--verm);} .wst.missed{background:#eee9e0;color:#8b8272;}
+  .wish .ws{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;}
+  .schip{font-size:11px;padding:3px 9px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;font-variant-numeric:tabular-nums;}
+  .schip.done{background:var(--jade);color:#fff;border-color:var(--jade);}
+  .schip.skip{background:#e5e0d6;color:#7a7264;border-color:#d8d0c2;text-decoration:line-through;}
+  .schip.past{opacity:.5;}
+  .schip.future{border-style:dashed;}
+  .schip.static{cursor:default;}
+  .hbtn{width:22px;height:22px;border:none;background:none;color:#c9bfae;font-size:15px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;}
+  .hbtn.on{color:var(--verm);}
+  .footbar{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;background:var(--card);border-top:1px solid var(--line);padding:9px 14px;display:flex;gap:10px;align-items:center;z-index:40;box-shadow:0 -2px 10px rgba(90,70,40,.08);}
+  .progwrap{flex:1;}
+  .progbar{height:8px;background:#eee4d4;border-radius:6px;overflow:hidden;}
+  .progfill{height:100%;background:var(--jade);border-radius:6px;transition:width .3s;}
+  .progtxt{font-size:11px;color:var(--ink-soft);margin-top:3px;display:flex;justify-content:space-between;}
+  .reset{font-size:12px;color:var(--ink-soft);border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px;cursor:pointer;white-space:nowrap;transition:.15s;}
+  .reset.danger{background:var(--verm);color:#fff;border-color:var(--verm);font-weight:700;}
+  .empty{text-align:center;color:var(--ink-soft);font-size:13px;padding:26px 10px;}
+  .hint{font-size:11.5px;color:var(--ink-soft);text-align:center;margin:16px 10px 0;line-height:1.7;}
+  .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:9px 18px;border-radius:20px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:99;white-space:nowrap;display:flex;gap:12px;align-items:center;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+  .toast .tact{color:var(--gold-soft);font-weight:700;cursor:pointer;text-decoration:underline;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>🏮 清明上河园 · 游园助手</h1>
+  <div class="sub">各自打卡 · 智能推荐下一站 · 多场次自动补场 · 必看别错过</div>
+  <div class="clockrow">
+    <div class="clock" id="clock">--:--</div>
+    <div class="parkstat" id="parkstat">加载中</div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<div class="wrap">
+  <div id="dayOnly">
+    <div id="recoBox"></div>
+    <div id="gapBox"></div>
+    <div class="sec warn">⭐ 今日必看（来自心愿清单） <span class="cnt" id="mustCnt">0</span></div>
+    <div id="mustBox"></div>
+    <div class="sec">🗺️ 全天行程 <span class="cnt" id="tlCnt">0</span></div>
+    <div class="filters" id="filters"></div>
+    <ul class="tl" id="timeline"></ul>
+    <div id="skipSummary" style="margin-top:14px"></div>
+    <div class="hint">
+      进度只保存在<b>你自己手机</b>上，同伴之间互不影响。<br/>
+      点圆圈=打卡去过 · 点「跳」=这场不去（误点再点一下即恢复）；「已跳过」汇总在下方批量恢复。<br/>
+      ⭐ 必看提醒 = 我的心愿清单 ∩ 今天有场次：只提醒你在乎的。<br/>
+      🎫 东京梦华仅 Day1 安排：购票送 3 天大门票，门票演出当天起用、不可重复观看。<br/>
+      多场次演出错过一场会自动推荐下一场；清空打卡需二次确认且 8 秒内可撤销。<br/>
+      时刻以园区当天节目单为准 · 坐标为园区大致方位，仅用于就近提示。
+    </div>
+  </div>
+  <div id="wishOnly" style="display:none">
+    <div class="sec">💗 我的心愿清单 <span class="cnt" id="wishCnt">0</span></div>
+    <div id="wishBox"></div>
+    <div class="hint">
+      清单贯穿三天，默认收录 4 星以上；在「DAY」页行程行点 ♡ 可增删。<br/>
+      场次 chip：绿=看过 · 划线=已跳过（点按恢复）· 半透明=已结束 · 虚线=未来天。<br/>
+      点任意一天的 chip = 跳过/恢复该场，用于当天或跨天微调；跳过后当天必看提醒不再催它。<br/>
+      清单与进度都只保存在你自己手机上。
+    </div>
+  </div>
+</div>
+
+<div class="footbar">
+  <div class="progwrap">
+    <div class="progbar"><div class="progfill" id="progfill" style="width:0"></div></div>
+    <div class="progtxt"><span id="progtxt">今日 0 / 0</span><span id="locTxt">📍 未定位</span></div>
+  </div>
+  <div class="reset" id="resetBtn">清空打卡</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const COORD = {
+  "迎宾门":[90,50],"大宋校场":[15,15],"四方院":[35,30],"主街":[55,48],
+  "宣德殿":[50,25],"大宋皇家乐园":[60,35],"清明文化广场":[45,55],
+  "上善门城楼":[75,45],"九龙桥西南水面":[30,75],"虹桥两侧水面":[55,70],
+  "景龙湖水面":[25,65],"东京梦华舞台":[65,60],"水傀儡馆":[50,45],
+  "大师坊/勾栏瓦肆":[40,65],"东京食坊":[55,50],"丹凤门":[80,40],
+  "音乐广场":[70,55],"球幕影院":[35,45],"王员外家门口":[45,40],"浣沙溪桥":[58,38]
+};
+const CATNAME = {show:"演出",npc:"NPC互动",exp:"体验/赚交子",food:"餐饮",transit:"转场"};
+
+const DAYS = [
+  {key:"d1",label:"DAY 1",date:"10/30",dow:"周五 下午场",items:[
+    {id:"d1-1",t:"13:00",e:"13:30",name:"入园",loc:"迎宾门",star:0,cat:"transit",note:"迎宾门进往西走 · 拿游园秘笈地图"},
+    {id:"d1-2",t:"13:00",e:"13:40",name:"赚交子(你比划/明察秋毫)",loc:"四方院",star:2,cat:"exp",note:"最实惠、快乐多、i人友好"},
+    {id:"d1-3",t:"13:40",e:"14:40",name:"背宋词",loc:"四方院",star:3,cat:"exp",note:"⚡一首换3-5张 · 效率最高"},
+    {id:"d1-4",t:"14:50",e:"15:20",name:"杨门女将",sn:"杨门女将",show:"yangmen",loc:"东京梦华舞台",star:2,cat:"show",prep:15,note:"剧情为主无特效 · 提前15分钟占位"},
+    {id:"d1-5",t:"15:40",e:"16:05",name:"五鼠闹东京",sn:"五鼠闹东京",show:"wushu",loc:"上善门城楼",star:2,cat:"show",note:"威亚+扔石头 · 白天声光电弱"},
+    {id:"d1-6",t:"16:10",e:"16:40",name:"岳飞枪挑小梁王",sn:"岳飞枪挑小梁王",show:"yuefei",loc:"大宋校场",star:4,cat:"show",prep:30,note:"⚠️真马+火烧前排会被淋 · 提前30分钟占中间靠后"},
+    {id:"d1-7",t:"16:50",e:"17:30",name:"晚饭",loc:"东京食坊",star:0,cat:"food",note:"错峰吃不排队"},
+    {id:"d1-8",t:"17:30",e:"18:15",name:"皇家乐园NPC互动",sn:"皇家乐园互动",show:"huangjia",loc:"大宋皇家乐园",star:3,cat:"npc",note:"⚡展昭此时段 · Q版NPC+投壶赢交子"},
+    {id:"d1-9",t:"18:20",e:"18:55",name:"鱼灯巡游",sn:"鱼灯巡游",show:"yudeng",loc:"清明文化广场",star:4,cat:"show",prep:10,note:"⚡展昭出场拍照最美 · 看完直接转场"},
+    {id:"d1-10",t:"19:00",e:"19:35",name:"快速转场",loc:"景龙湖水面",star:0,cat:"transit",note:"往景龙湖方向 · 约5分钟"},
+    {id:"d1-11",t:"19:40",e:"20:50",name:"大宋·东京梦华",sn:"大宋·东京梦华",show:"menghua",loc:"景龙湖水面",star:5,cat:"show",ticket:1,note:"🎫70分钟水上实景大剧 · A区299元 · 购票送3天大门票(演出当天起用)"},
+    {id:"d1-12",t:"21:00",e:"21:35",name:"打铁花",sn:"打铁花",show:"tietua",loc:"九龙桥西南水面",star:5,cat:"show",prep:30,note:"8师傅城楼齐打金色火花 · 找无遮挡位"},
+    {id:"d1-13",t:"21:50",e:"22:20",name:"凤舞九天",sn:"凤舞九天",show:"fengwu",loc:"上善门城楼",star:5,cat:"show",note:"天女散花+旋转烟花 · ⚠️只东侧能看到"}
+  ]},
+  {key:"d2",label:"DAY 2",date:"10/31",dow:"周六 全天",items:[
+    {id:"d2-1",t:"09:00",e:"09:35",name:"飞跃清明上河图",sn:"飞跃清明上河图",show:"feiyue",loc:"球幕影院",star:5,cat:"show",prep:45,note:"裸眼3D 8分钟 · ⚠️第一批冲排45-60分钟 · 选第4排中间"},
+    {id:"d2-2",t:"09:40",e:"10:00",name:"包公漕运",sn:"包公漕运",show:"baogong",loc:"虹桥两侧水面",star:3,cat:"show",note:"真人高空跳水 · 站桥西南岸不用上桥"},
+    {id:"d2-3",t:"10:00",e:"10:40",name:"东京保卫战",sn:"东京保卫战",show:"baowei",loc:"九龙桥西南水面",star:5,cat:"show",prep:40,note:"炮火+水柱感染力极强 · ⚠️提前40分钟 · 假山镇视角最全"},
+    {id:"d2-4",t:"10:50",e:"11:20",name:"岳飞枪挑小梁王",sn:"岳飞枪挑小梁王",show:"yuefei",loc:"大宋校场",star:3,cat:"show",prep:30,note:"看过Day1可跳过 · 东侧看台有树荫"},
+    {id:"d2-5",t:"11:40",e:"12:05",name:"宋廷梦乐",sn:"宋廷梦乐",show:"songting",loc:"宣德殿",star:3,cat:"show",prep:10,note:"现场乐器+科班舞蹈 · 室内有空调 · 座位有限提前10分钟"},
+    {id:"d2-5b",t:"11:50",e:"12:15",name:"杨门女将(上午场)",sn:"杨门女将",show:"yangmen",loc:"东京梦华舞台",star:2,cat:"show",note:"一天两场之一(下午场14:50) · 看过可跳过"},
+    {id:"d2-6",t:"12:10",e:"12:35",name:"水傀儡",sn:"水傀儡",show:"shuikui",loc:"水傀儡馆",star:3,cat:"show",note:"哪吒闹海+喷火喷水 · ⚠️场馆小往后排站"},
+    {id:"d2-7",t:"12:40",e:"13:25",name:"午饭+休息",loc:"东京食坊",star:0,cat:"food",note:"吃完歇脚"},
+    {id:"d2-8",t:"13:30",e:"14:40",name:"我在宋朝当大官",loc:"大宋皇家乐园",star:3,cat:"npc",note:"辛弃疾/李清照互动问答 · ⚠️先在浣沙溪桥领任务卡"},
+    {id:"d2-9",t:"14:50",e:"15:15",name:"杨门女将",sn:"杨门女将",show:"yangmen",loc:"东京梦华舞台",star:2,cat:"show",note:"看过可跳过不用抢位"},
+    {id:"d2-10",t:"15:00",e:"15:35",name:"龙马花车巡游",sn:"龙马花车巡游",show:"longma",loc:"丹凤门",star:3,cat:"show",prep:10,note:"丹凤门→音乐广场 · 沿主街站立 · 提前10分钟"},
+    {id:"d2-11",t:"15:40",e:"16:05",name:"五鼠闹东京",sn:"五鼠闹东京",show:"wushu",loc:"上善门城楼",star:2,cat:"show",note:"白天效果一般"},
+    {id:"d2-12",t:"16:10",e:"16:35",name:"岳飞枪挑小梁王",sn:"岳飞枪挑小梁王",show:"yuefei",loc:"大宋校场",star:3,cat:"show",prep:30,note:"校场东侧看台"},
+    {id:"d2-13",t:"16:30",e:"17:20",name:"皇家乐园(第二轮)",sn:"皇家乐园互动",show:"huangjia",loc:"大宋皇家乐园",star:4,cat:"npc",note:"⚡展昭巡逻 · 合影/互动问答 入口处"},
+    {id:"d2-3b",t:"17:20",e:"18:00",name:"东京保卫战(下午场)",sn:"东京保卫战",show:"baowei",loc:"九龙桥西南水面",star:5,cat:"show",prep:40,note:"一天两场之一 · 错过上午场可补 · ⚠️提前40分钟占位"},
+    {id:"d2-14",t:"17:30",e:"18:10",name:"斗鸡+耍猴",sn:"斗鸡+耍猴",show:"douji",loc:"大师坊/勾栏瓦肆",star:2,cat:"show",note:"民俗绝活 · 10元竞猜斗鸡 · 松弛休息"},
+    {id:"d2-15",t:"18:20",e:"18:55",name:"鱼灯巡游",sn:"鱼灯巡游",show:"yudeng",loc:"清明文化广场",star:5,cat:"show",prep:15,note:"★拍照最佳:展昭簪花郎都在 · ⚠️提前15分钟占中间 · 夜灯绝美"},
+    {id:"d2-16",t:"18:50",e:"19:40",name:"大宋百戏互动",loc:"主街",star:2,cat:"npc",note:"路边摊NPC对话 · 赢交子/闲聊"},
+    {id:"d2-17b",t:"20:10",e:"20:50",name:"岳飞·郾城大捷",sn:"岳飞·郾城大捷",show:"yancheng",loc:"大宋校场",star:5,cat:"show",prep:40,note:"夜场仅周末开演 · 比白天版更震撼 · ⚠️提前40分钟 · Day2夜场主秀"},
+    {id:"d2-18",t:"21:20",e:"21:55",name:"打铁花",sn:"打铁花",show:"tietua",loc:"九龙桥西南水面",star:5,cat:"show",prep:30,note:"临水石阶最佳"},
+    {id:"d2-19",t:"22:00",e:"22:30",name:"凤舞九天",sn:"凤舞九天",show:"fengwu",loc:"上善门城楼",star:5,cat:"show",note:"夜景威亚秀 · 只东侧可见"}
+  ]},
+  {key:"d3",label:"DAY 3",date:"11/1",dow:"周日 半天",items:[
+    {id:"d3-1",t:"09:20",e:"09:40",name:"包公漕运",sn:"包公漕运",show:"baogong",loc:"虹桥两侧水面",star:3,cat:"show",note:"虹桥西南岸"},
+    {id:"d3-2",t:"09:40",e:"10:00",name:"水傀儡",sn:"水傀儡",show:"shuikui",loc:"水傀儡馆",star:3,cat:"show",note:"没看过就补 · 场馆小往前挤"},
+    {id:"d3-3",t:"10:00",e:"10:35",name:"东京保卫战",sn:"东京保卫战",show:"baowei",loc:"九龙桥西南水面",star:3,cat:"show",prep:15,note:"看过可跳过 · 提前15分钟"},
+    {id:"d3-4",t:"10:40",e:"11:15",name:"斗鸡+耍猴",sn:"斗鸡+耍猴",show:"douji",loc:"大师坊/勾栏瓦肆",star:2,cat:"show",note:"民俗绝活 · 松弛休息"},
+    {id:"d3-4b",t:"10:50",e:"11:20",name:"岳飞枪挑小梁王(上午场)",sn:"岳飞枪挑小梁王",show:"yuefei",loc:"大宋校场",star:3,cat:"show",prep:30,note:"一天两场之一 · ⚠️提前30分钟 · 东侧看台中间靠后"},
+    {id:"d3-5",t:"11:20",e:"11:45",name:"王员外招婿",loc:"王员外家门口",star:2,cat:"npc",note:"⚠️穿红衣易被选中 · 想互动就穿红"},
+    {id:"d3-6",t:"11:50",e:"12:25",name:"补漏体验(飞跃/皇家乐园)",loc:"球幕影院",star:4,cat:"exp",note:"二刷球幕 · 人少体验好"},
+    {id:"d3-7",t:"12:30",e:"13:00",name:"午饭+拍照",loc:"东京食坊",star:2,cat:"food",note:"人少出片好时机"},
+    {id:"d3-8",t:"13:00",e:"15:20",name:"查漏补缺·自由逛",loc:"主街",star:2,cat:"exp",note:"逛店/补NPC/拍照"},
+    {id:"d3-9",t:"15:30",e:"15:45",name:"出园",loc:"迎宾门",star:0,cat:"transit",note:"迎宾门出"}
+  ]}
+];
+
+const LS_KEY = "qshpark_checkin_v2";
+// 心愿清单默认收录：4星及以上剧目/体验（按 show key 或 solo:id）
+const DEFAULT_WISH = ["menghua","tietua","fengwu","feiyue","baowei","yudeng","yancheng","yuefei","huangjia"];
+let state = { checked:{}, skipped:{}, wish:{}, wishInit:false, dayIdx:0, view:"day", filter:"all", locOverride:null };
+try{ const s = JSON.parse(localStorage.getItem(LS_KEY)); if(s){ if(s.checked)state.checked=s.checked; if(s.skipped)state.skipped=s.skipped; if(s.wish)state.wish=s.wish; if(s.wishInit)state.wishInit=true; } }catch(e){}
+if(!state.wishInit){ DEFAULT_WISH.forEach(k=>state.wish[k]=1); state.wishInit=true; save(); }
+// 旧版迁移：皇家乐园互动由独立项改为剧目 huangjia
+if(state.wish["solo:d1-8"]){ delete state.wish["solo:d1-8"]; state.wish["huangjia"]=1; save(); }
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify({checked:state.checked,skipped:state.skipped,wish:state.wish,wishInit:state.wishInit})); }catch(e){} }
+
+function toMin(hhmm){ const [h,m]=hhmm.split(":").map(Number); return h*60+m; }
+function nowMin(){ if(window.__FAKE_NOW!=null) return window.__FAKE_NOW; const d=new Date(); return d.getHours()*60+d.getMinutes(); }
+function stars(n){ return n>0 ? "★".repeat(n) : ""; }
+function dist(a,b){ const A=COORD[a],B=COORD[b]; if(!A||!B) return 50; return Math.round(Math.hypot(A[0]-B[0],A[1]-B[1])); }
+function fmtDist(v){ return v<=12?"就在附近":v<=28?"步行约"+Math.round(v/6)+"分钟":"较远·步行约"+Math.round(v/6)+"分钟"; }
+let toastTimer=null;
+function toast(msg, actLabel, actFn){
+  const t=document.getElementById("toast");
+  t.innerHTML="";
+  const sp=document.createElement("span"); sp.textContent=msg; t.appendChild(sp);
+  if(actLabel){ const a=document.createElement("span"); a.className="tact"; a.textContent=actLabel;
+    a.onclick=()=>{ actFn&&actFn(); t.classList.remove("show"); }; t.appendChild(a); }
+  t.classList.add("show"); clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"), actLabel?8000:1600);
+}
+function curDay(){ return DAYS[state.dayIdx]; }
+function isChecked(id){ return !!state.checked[id]; }
+function isSkipped(id){ return !!state.skipped[id]; }
+function toggle(id){ if(state.checked[id]) delete state.checked[id]; else state.checked[id]=1; save(); render(); }
+function toggleSkip(id){ if(state.skipped[id]) delete state.skipped[id]; else state.skipped[id]=1; save(); render(); }
+function skipGroup(ids,on){ ids.forEach(id=>{ if(on) state.skipped[id]=1; else delete state.skipped[id]; }); save(); render(); }
+function currentLoc(){
+  if(state.locOverride) return state.locOverride;
+  const items = curDay().items.filter(i=>isChecked(i.id));
+  if(items.length) return items[items.length-1].loc;
+  return "迎宾门";
+}
+function itemStatus(it, now){
+  if(isSkipped(it.id)) return "skipped";
+  if(isChecked(it.id)) return "done";
+  const s=toMin(it.t), e=toMin(it.e);
+  if(now>=s && now<=e) return "now";
+  if(now<s) return (it.prep && now>=s-it.prep) ? "soon":"upcoming";
+  return "missed";
+}
+function sessionsOf(show){ return curDay().items.filter(i=>i.show===show).sort((a,b)=>toMin(a.t)-toMin(b.t)); }
+function laterSession(it, now){
+  if(!it.show) return null;
+  return sessionsOf(it.show).find(s=>s.id!==it.id && toMin(s.t)>toMin(it.t) && ["upcoming","soon","now"].includes(itemStatus(s,now)) && !isSkipped(s.id));
+}
+function missedSessions(it, now){
+  if(!it.show) return [];
+  return sessionsOf(it.show).filter(s=>s.id!==it.id && toMin(s.t)<toMin(it.t) && itemStatus(s,now)==="missed" && !isSkipped(s.id));
+}
+
+function recommend(){
+  const now=nowMin(), myloc=currentLoc();
+  // 时间序主轴：正在进行 > 已进入占位窗口 > 当天最早未开始的一场；转场/餐食不作推荐目标
+  const pool=curDay().items.filter(it=>it.cat!=="transit"&&it.cat!=="food");
+  const byTime=(a,b)=>toMin(a.t)-toMin(b.t)||b.star-a.star||dist(myloc,a.loc)-dist(myloc,b.loc);
+  let best=null;
+  const nows=pool.filter(it=>itemStatus(it,now)==="now");
+  if(nows.length){ nows.sort((a,b)=>b.star-a.star||dist(myloc,a.loc)-dist(myloc,b.loc)); best=nows[0]; }
+  else{
+    const soons=pool.filter(it=>itemStatus(it,now)==="soon");
+    if(soons.length){ soons.sort(byTime); best=soons[0]; }
+    else{
+      const ups=pool.filter(it=>itemStatus(it,now)==="upcoming");
+      if(!ups.length) return null;
+      ups.sort(byTime); best=ups[0];
+    }
+  }
+  const st=itemStatus(best,now), s=toMin(best.t), d=dist(myloc,best.loc);
+  const locTxt=(myloc!==best.loc)?`从${myloc}过去${fmtDist(d)}`:"你已在这附近";
+  let why="";
+  if(st==="now") why=`正在上演！${locTxt}，赶过去还来得及。`;
+  else if(st==="soon") why=`${best.t}开场，${best.prep?"建议提前"+best.prep+"分钟占位":""}。${locTxt}，现在该出发了。`;
+  else { const mu=s-now; why=`${mu>=180?"离开场还早，先规划：":""}${best.t}开场(还有${mu>=60?Math.floor(mu/60)+"小时"+(mu%60?mu%60+"分":""):mu+"分钟"})，${stars(best.star)}${best.star>=4?"必看":""}。${locTxt}。`; }
+  const missed=missedSessions(best,now);
+  if(missed.length) why+=` 你已错过今天早前的 ${missed.map(m=>m.t).join("/")} 场，这是补场机会。`;
+  const later=laterSession(best,now);
+  if(st!=="now" && !missed.length && later) why+=` 赶不上也没关系，今天 ${later.t} 还有一场。`;
+  if(best.ticket) why+=" 🎫需单独购票。";
+  return {it:best,why,status:st};
+}
+
+function gapFiller(reco){
+  const now=nowMin(), myloc=currentLoc();
+  let free=0;
+  if(reco){ free=toMin(reco.it.t)-now; if(reco.status==="now") free=0; }
+  if(free<25) return [];
+  const pool=curDay().items.filter(it=>!isChecked(it.id)&&!isSkipped(it.id)&&(it.cat==="exp"||it.cat==="npc")&&it.star>=2);
+  pool.sort((a,b)=>(b.star*10-dist(myloc,a.loc))-(a.star*10-dist(myloc,b.loc)));
+  return pool.slice(0,3).map(it=>({...it,_d:dist(myloc,it.loc)}));
+}
+
+function showGroups(){
+  const map={};
+  curDay().items.forEach(it=>{
+    if(it.cat==="transit") return;
+    const k=it.show||("solo:"+it.id);
+    if(!map[k]) map[k]={key:k,name:it.sn||it.name,star:it.star,sessions:[it.show?it:it],ids:[],maxstar:0};
+    const g=map[k];
+    if(it.show){ if(!g.sessions.find(s=>s.id===it.id)) g.sessions.push(it); }
+    if(!g.ids.includes(it.id)) g.ids.push(it.id);
+    g.maxstar=Math.max(g.maxstar,it.star);
+  });
+  Object.values(map).forEach(g=>g.sessions.sort((a,b)=>toMin(a.t)-toMin(b.t)));
+  return Object.values(map);
+}
+function groupStatus(g, now){
+  if(g.ids.some(isChecked)) return {st:"done"};
+  const live=g.sessions.filter(s=>["now","soon","upcoming"].includes(itemStatus(s,now)));
+  if(live.length) return {st:(itemStatus(live[0],now)==="now"||itemStatus(live[0],now)==="soon")?"soon":"wait", next:live[0]};
+  if(g.ids.every(isSkipped)) return {st:"skipped"};
+  return {st:"missed"};
+}
+
+function renderTabs(){
+  const box=document.getElementById("tabs"); box.innerHTML="";
+  DAYS.forEach((d,i)=>{
+    const act=d.items.filter(x=>x.cat!=="transit"&&!isSkipped(x.id));
+    const done=act.filter(x=>isChecked(x.id)).length;
+    const el=document.createElement("div");
+    el.className="tab"+(state.view==="day"&&i===state.dayIdx?" active":"");
+    el.innerHTML=`${d.label}<span class="d">${d.date} ${d.dow}</span><span class="prog">${done}/${act.length}</span>`;
+    el.onclick=()=>{state.view="day";state.dayIdx=i;render();};
+    box.appendChild(el);
+  });
+  const wishN=tripGroups().filter(g=>state.wish[g.key]).length;
+  const seenN=tripGroups().filter(g=>state.wish[g.key]&&g.sessions.some(s=>isChecked(s.id))).length;
+  const w=document.createElement("div");
+  w.className="tab"+(state.view==="wish"?" active":"");
+  w.innerHTML=`💗 心愿<span class="d">贯穿三天</span><span class="prog">${seenN}/${wishN}</span>`;
+  w.onclick=()=>{state.view="wish";render();};
+  box.appendChild(w);
+}
+function renderViewSwitch(){
+  document.getElementById("dayOnly").style.display = state.view==="day"?"":"none";
+  document.getElementById("wishOnly").style.display = state.view==="wish"?"":"none";
+}
+function renderClock(){
+  const n=nowMin();
+  document.getElementById("clock").textContent=String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0");
+  const el=document.getElementById("parkstat");
+  if(n>=9*60&&n<=22*60+30){el.textContent="🟢 园区开放中";el.className="parkstat open";}
+  else{el.textContent="🌙 非演出时段";el.className="parkstat closed";}
+}
+function renderReco(){
+  const box=document.getElementById("recoBox");
+  const reco=recommend();
+  if(!reco){
+    box.innerHTML=`<div class="reco" style="border-color:var(--jade)"><div class="rt">✅ 今日推荐</div>
+      <div class="rn" style="color:var(--jade)">暂无可推荐</div>
+      <div class="rmeta">当前时段没有即将开始的推荐项目（或都已跳过/打卡），看看下方全天行程吧。</div></div>`;
+    return reco;
+  }
+  const it=reco.it, urgent=reco.status==="now"||reco.status==="soon";
+  box.innerHTML=`<div class="reco">
+    <div class="rt">${urgent?"🔴":"🟡"} ${reco.status==="now"?"正在进行":(reco.status==="soon"?"该出发了":"接下来推荐")}</div>
+    <div class="rn">${it.name}</div>
+    <div class="rmeta"><span class="rstars">${stars(it.star)}</span> · ${it.t}开场 · 📍${it.loc} · ${CATNAME[it.cat]}</div>
+    <div class="rwhy">${reco.why}</div>
+    <div class="rcta">
+      <div class="btn" onclick="locateAt('${it.loc}')">我到这儿了</div>
+      <div class="btn primary" onclick="toggle('${it.id}')">✓ 打卡去过</div>
+    </div></div>`;
+  return reco;
+}
+function renderGap(reco){
+  const box=document.getElementById("gapBox");
+  const list=gapFiller(reco);
+  if(!list.length){box.innerHTML="";return;}
+  let html=`<div class="gap"><div class="gh">💡 空档别浪费 · 就近体验</div>`;
+  list.forEach(it=>{
+    html+=`<div class="gi"><div><span class="nm">${it.name}</span> <span style="color:var(--gold)">${stars(it.star)}</span><div class="ds">📍${it.loc} · ${fmtDist(it._d)}</div></div>
+      <div class="mini-check" onclick="toggle('${it.id}')">打卡</div></div>`;
+  });
+  box.innerHTML=html+`</div>`;
+}
+function renderMust(){
+  const now=nowMin();
+  // 必看 = 我的心愿清单 ∩ 今天有场次（心愿是唯一主观来源）
+  const groups=showGroups().filter(g=>state.wish[g.key]);
+  const box=document.getElementById("mustBox");
+  if(!groups.length){
+    document.getElementById("mustCnt").textContent="0/0";
+    box.innerHTML=`<div class="empty">今天的心愿清单是空的～去「💗 心愿」页或行程行点 ♡ 收藏想看的</div>`;
+    return;
+  }
+  const rows=[];
+  groups.forEach(g=>{
+    const gs=groupStatus(g,now);
+    if(gs.st==="done") rows.push({g,gs,ord:3});
+    else if(gs.st==="skipped") rows.push({g,gs,ord:4});
+    else if(gs.st==="soon") rows.push({g,gs,ord:0});
+    else if(gs.st==="wait") rows.push({g,gs,ord:1});
+    else rows.push({g,gs,ord:2});
+  });
+  rows.sort((a,b)=>a.ord-b.ord || b.g.maxstar-a.g.maxstar);
+  const doneN=rows.filter(r=>r.gs.st==="done").length;
+  const skipN=rows.filter(r=>r.gs.st==="skipped").length;
+  document.getElementById("mustCnt").textContent=`${doneN}/${rows.length} 已看`+(skipN?` · ${skipN} 跳过`:"");
+  const vis=rows.filter(r=>r.gs.st!=="done"&&r.gs.st!=="skipped");
+  if(!vis.length){ box.innerHTML=`<div class="empty">🎉 必看项目全部打卡 / 跳过处理完毕！</div>`; return; }
+  let html="";
+  vis.forEach(({g,gs})=>{
+    const tagcls=gs.st==="soon"?"soon":(gs.st==="wait"?"wait":"missed");
+    const tag=gs.st==="soon"?(itemStatus(gs.next,now)==="now"?"进行中":"即将开场"):(gs.st==="wait"?"待看":"已错过");
+    const nxt=gs.next;
+    let line="";
+    if(nxt){
+      const mu=toMin(nxt.t)-now;
+      line=`<div class="row"><span>🕐 下一场 <b>${nxt.t}</b>${mu>0?` · 还有${mu>=60?Math.floor(mu/60)+"小时"+(mu%60?mu%60+"分":""):mu+"分"}`:""}</span><span>📍 ${nxt.loc}</span>${nxt.ticket?'<span>🎫 需购票</span>':""}</div><div>${nxt.note}${nxt.prep&&gs.st==="soon"&&!nxt.note.includes("提前")?` · ⚠️建议提前${nxt.prep}分钟占位`:""}</div>`;
+    } else {
+      const ss=g.sessions.map(s=>s.t).join("/");
+      line=`<div class="row"><span>🕐 今日场次 ${ss} 均已结束</span></div><div>${g.sessions[0].note}</div>`;
+    }
+    const multi=g.sessions.length>1?`<div style="margin-top:4px;font-size:11px;color:#a08c6a">🎪 今日共 ${g.sessions.length} 场：${g.sessions.map(s=>s.t+(isChecked(s.id)?"✓":isSkipped(s.id)?"跳":"")).join(" · ")}</div>`:"";
+    html+=`<div class="must ${tagcls}"><div class="mh"><span class="mname">${g.name}</span><span class="mstars">${stars(g.maxstar)}</span><span class="tag ${tagcls}">${tag}</span></div>
+      <div class="mb">${line}${multi}</div>
+      ${nxt?`<div class="mact"><div class="btn primary" onclick="toggle('${nxt.id}')">✓ 打卡这场</div><div class="btn" onclick="skipGroup(${JSON.stringify(g.ids).replace(/"/g,"'")},true)">今天不看它</div></div>`:`<div class="mact"><div class="btn" onclick="skipGroup(${JSON.stringify(g.ids).replace(/"/g,"'")},true)">今天不看它</div></div>`}
+      </div>`;
+  });
+  box.innerHTML=html;
+}
+function renderFilters(){
+  const box=document.getElementById("filters"); box.innerHTML="";
+  const cats=["all","show","npc","exp","food"], names={all:"全部",show:"演出",npc:"NPC",exp:"体验",food:"餐饮"};
+  cats.forEach(c=>{
+    const el=document.createElement("div");
+    el.className="chip"+(state.filter===c?" active":"");
+    el.textContent=names[c];
+    el.onclick=()=>{state.filter=c;renderFilters();renderTimeline();};
+    box.appendChild(el);
+  });
+}
+function renderTimeline(){
+  const now=nowMin();
+  let items=curDay().items;
+  if(state.filter!=="all") items=items.filter(it=>it.cat===state.filter);
+  document.getElementById("tlCnt").textContent=`${curDay().items.length} 项`;
+  const box=document.getElementById("timeline");
+  if(!items.length){box.innerHTML=`<div class="empty">该分类暂无项目</div>`;return;}
+  let html="";
+  items.forEach(it=>{
+    const st=itemStatus(it,now);
+    const alt=st==="missed"?laterSession(it,now):null;
+    const wk=wishKey(it);
+    const wished=!!state.wish[wk];
+    html+=`<li class="item ${st==="done"?"done":""} ${st==="skipped"?"skipped":""} ${st==="missed"?"past":""} ${st==="now"?"now":""}">
+      <div class="time">${it.t}</div>
+      <div class="body" onclick="toggle('${it.id}')">
+        <div class="iname">${it.name} ${it.star?`<span class="istars">${stars(it.star)}</span>`:""}
+          <span class="badge loc">📍${it.loc}</span>
+          ${st==="now"?'<span class="badge now">进行中</span>':""}
+          ${st==="missed"?(alt?`<span class="badge alt">已结束 · ${alt.t} 可补场</span>`:'<span class="badge">已结束</span>'):""}
+          ${st==="skipped"?'<span class="badge skip">已跳过</span>':""}
+          ${it.ticket?'<span class="badge">🎫购票</span>':""}
+        </div>
+        <div class="inote">${it.note||""}</div>
+      </div>
+      <div class="acts">
+        <div class="hbtn ${wished?"on":""}" title="${wished?"从心愿清单移除":"加入心愿清单"}" onclick="toggleWish('${wk}')">${wished?"♥":"♡"}</div>
+        <div class="skipbtn" title="${st==="skipped"?"撤销跳过":"标记这场跳过"}" onclick="toggleSkip('${it.id}')">跳</div>
+        <div class="chk" onclick="toggle('${it.id}')">${st==="done"?"✓":""}</div>
+      </div>
+    </li>`;
+  });
+  box.innerHTML=html;
+}
+/* 跨天聚合：按 show key / solo id 汇总三天所有场次 */
+function tripGroups(){
+  const map={};
+  DAYS.forEach((d,di)=>{
+    d.items.forEach(it=>{
+      if(it.cat==="transit") return;
+      const k=it.show||("solo:"+it.id);
+      if(!map[k]) map[k]={key:k,name:it.sn||it.name,maxstar:0,sessions:[]};
+      const g=map[k];
+      g.sessions.push({...it,day:di});
+      g.maxstar=Math.max(g.maxstar,it.star);
+    });
+  });
+  Object.values(map).forEach(g=>g.sessions.sort((a,b)=>a.day-b.day||toMin(a.t)-toMin(b.t)));
+  return Object.values(map);
+}
+function wishKey(it){ return it.show||("solo:"+it.id); }
+function toggleWish(k){ if(state.wish[k]) delete state.wish[k]; else state.wish[k]=1; save(); render(); }
+function renderWish(){
+  const now=nowMin();
+  const groups=tripGroups().filter(g=>state.wish[g.key]);
+  const box=document.getElementById("wishBox");
+  const seenN=groups.filter(g=>g.sessions.some(s=>isChecked(s.id))).length;
+  document.getElementById("wishCnt").textContent=`${seenN}/${groups.length} 已达成`;
+  if(!groups.length){ box.innerHTML=`<div class="empty">清单是空的～在行程列表点 ♡ 收藏想去的项目</div>`; return; }
+  // 排序：未去且有剩余场次 > 已达成 > 全错过
+  const rows=groups.map(g=>{
+    const seen=g.sessions.some(s=>isChecked(s.id));
+    const open=g.sessions.some(s=>!isChecked(s.id)&&!isSkipped(s.id)&&(s.day>state.dayIdx||(s.day===state.dayIdx&&toMin(s.e)>=now)));
+    return {g,seen,open,ord:seen?(open?1:2):(open?0:3)};
+  }).sort((a,b)=>a.ord-b.ord||b.g.maxstar-a.g.maxstar);
+  let html="";
+  rows.forEach(({g,seen,open})=>{
+    const tag=seen?"seen":(open?"open":"missed");
+    const tagTxt=seen?"已去过":(open?"还没去":"已错过");
+    let chips="";
+    g.sessions.forEach(s=>{
+      const st=s.day===state.dayIdx?itemStatus(s,now):(s.day<state.dayIdx?(isChecked(s.id)?"done":"missed"):"future");
+      const cls=isChecked(s.id)?"done":(isSkipped(s.id)?"skip":(st==="missed"?"past":(st==="future"?"future":"")));
+      const label="D"+(s.day+1)+" "+s.t+(isChecked(s.id)?"✓":(isSkipped(s.id)?"跳":""));
+      const clickable=s.day===state.dayIdx&&!isChecked(s.id);
+      const attr=clickable?("onclick=\"toggleSkip('"+s.id+"')\""):("title=\""+(s.day===state.dayIdx?"当天场次点按可跳过/恢复":"跨天场次仅供查看")+"\"");
+      chips+='<span class="schip '+cls+' '+(clickable?"":"static")+'" '+attr+'>'+label+'</span>';
+    });
+    html+=`<div class="wish ${seen?"seen":(open?"":"missed")}">
+      <div class="wh"><span class="wn">${g.name}</span><span style="color:var(--gold);font-size:12px">${stars(g.maxstar)}</span>
+        <span class="wst ${tag}">${tagTxt}</span>
+        <span class="hbtn on" title="从清单移除" onclick="toggleWish('${g.key}')">♥</span></div>
+      <div class="ws">${chips}</div></div>`;
+  });
+  box.innerHTML=html;
+}
+function renderSkipSummary(){
+  const box=document.getElementById("skipSummary");
+  const list=curDay().items.filter(it=>isSkipped(it.id));
+  if(!list.length){ box.innerHTML=""; return; }
+  let html=`<div class="skipbox"><div class="sh"><span>🚫 今日已跳过 ${list.length} 项（点「恢复」可撤销）</span><span class="all" onclick="skipGroup(${JSON.stringify(list.map(i=>i.id)).replace(/"/g,"'")},false)">全部恢复</span></div>`;
+  list.forEach(it=>{ html+=`<div class="si"><span><span class="t">${it.t}</span>${it.name}</span><span class="rb" onclick="toggleSkip('${it.id}')">恢复</span></div>`; });
+  box.innerHTML=html+`</div>`;
+}
+function renderProgress(){
+  const act=curDay().items.filter(it=>it.cat!=="transit"&&!isSkipped(it.id));
+  const done=act.filter(it=>isChecked(it.id)).length;
+  const skipN=curDay().items.filter(it=>it.cat!=="transit"&&isSkipped(it.id)).length;
+  const pct=act.length?Math.round(done/act.length*100):0;
+  document.getElementById("progfill").style.width=pct+"%";
+  document.getElementById("progtxt").textContent=`今日 ${done} / ${act.length}`+(skipN?` · 跳过${skipN}`:"");
+  document.getElementById("locTxt").textContent=`📍 ${currentLoc()}`;
+}
+function locateAt(loc){ state.locOverride=loc; render(); toast("已定位到 "+loc); }
+function render(){
+  renderClock();renderTabs();renderViewSwitch();renderProgress();
+  const reco=renderReco();renderGap(reco);renderMust();renderWish();renderFilters();renderTimeline();renderSkipSummary();
+}
+
+/* 清空：二次确认 + 8秒撤销 */
+let resetArmed=false, resetTimer=null;
+const resetBtn=document.getElementById("resetBtn");
+function disarmReset(){ resetArmed=false; clearTimeout(resetTimer); resetBtn.textContent="清空打卡"; resetBtn.classList.remove("danger"); }
+resetBtn.onclick=()=>{
+  if(!resetArmed){
+    resetArmed=true; resetBtn.textContent="再点一次确认清空"; resetBtn.classList.add("danger");
+    resetTimer=setTimeout(disarmReset,4000);
+    return;
+  }
+  disarmReset();
+  const snap={checked:JSON.parse(JSON.stringify(state.checked)),skipped:JSON.parse(JSON.stringify(state.skipped)),loc:state.locOverride};
+  state.checked={};state.skipped={};state.locOverride=null;save();render();
+  toast("已清空打卡与跳过", "撤销", ()=>{ state.checked=snap.checked; state.skipped=snap.skipped; state.locOverride=snap.loc; save(); render(); toast("已恢复"); });
+};
+
+render();
+setInterval(()=>{renderClock();renderReco();renderMust();renderTimeline();},30000);
+window.__QA={DAYS,state,recommend,laterSession,missedSessions,showGroups,groupStatus,itemStatus,toggle,toggleSkip,skipGroup,render,tripGroups,toggleWish,renderWish,
+  setDay(i){state.dayIdx=i;render();}, setNow(m){window.__FAKE_NOW=m;render();}, clearNow(){window.__FAKE_NOW=null;render();}};
+</script>
+</body>
+</html>
