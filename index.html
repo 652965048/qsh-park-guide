@@ -82,6 +82,7 @@
   .item .badge.now{background:var(--verm);color:#fff;}
   .item .badge.skip{background:#e5e0d6;color:#7a7264;}
   .item .badge.alt{background:#fdf0e0;color:#a06a1c;}
+  .item .badge.risk{background:#fde7e3;color:var(--verm);border:1px dashed var(--verm-soft);}
   .item .inote{font-size:12px;color:var(--ink-soft);margin-top:3px;}
   .item .acts{display:flex;flex-direction:row;gap:6px;align-items:center;align-self:center;flex-shrink:0;}
   .item .chk{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;background:#fff;transition:.15s;}
@@ -216,50 +217,43 @@ const DAYS = [
     {id:"d1-1",t:"13:00",e:"13:30",name:"入园",loc:"迎宾门",star:0,cat:"transit",note:"迎宾门进往西走 · 拿游园秘笈地图"},
     {id:"d1-2",t:"13:00",e:"13:40",name:"赚交子(你比划/明察秋毫)",loc:"四方院",star:2,cat:"exp",note:"最实惠、快乐多、i人友好"},
     {id:"d1-3",t:"13:40",e:"14:40",name:"背宋词",loc:"四方院",star:3,cat:"exp",note:"⚡一首换3-5张 · 效率最高"},
-    {id:"d1-4",t:"14:50",e:"15:20",name:"杨门女将",sn:"杨门女将",show:"yangmen",loc:"东京梦华舞台",star:2,cat:"show",prep:15,note:"剧情为主无特效 · 提前15分钟占位"},
-    {id:"d1-5",t:"15:40",e:"16:05",name:"五鼠闹东京",sn:"五鼠闹东京",show:"wushu",loc:"上善门城楼",star:2,cat:"show",note:"威亚+扔石头 · 白天声光电弱"},
-    {id:"d1-6",t:"16:10",e:"16:40",name:"岳飞枪挑小梁王",sn:"岳飞枪挑小梁王",show:"yuefei",loc:"大宋校场",star:4,cat:"show",prep:30,note:"⚠️真马+火烧前排会被淋 · 提前30分钟占中间靠后"},
+    {id:"d1-4",t:"14:50",e:"15:10",name:"杨门女将",sn:"杨门女将",show:"yangmen",loc:"东京梦华舞台",star:2,cat:"show",prep:15,note:"20分钟 · 剧情为主无特效 · 提前15分钟占位 · 全行程只看这一天"},
+    {id:"d1-5",t:"15:40",e:"15:55",name:"五鼠闹东京",sn:"五鼠闹东京",show:"wushu",loc:"上善门城楼",star:2,cat:"show",note:"15分钟 · 威亚+扔石头 · 白天声光电弱"},
+    {id:"d1-6",t:"16:10",e:"16:30",name:"岳飞枪挑小梁王",sn:"岳飞枪挑小梁王",show:"yuefei",loc:"大宋校场",star:4,cat:"show",prep:30,note:"20分钟 · ⚠️真马+火烧前排会被淋 · 提前30分钟占中间靠后 · 全行程只看这一天"},
     {id:"d1-7",t:"16:50",e:"17:30",name:"晚饭",loc:"东京食坊",star:0,cat:"food",note:"错峰吃不排队"},
-    {id:"d1-8",t:"17:30",e:"18:15",name:"皇家乐园NPC互动",sn:"皇家乐园互动",show:"huangjia",loc:"大宋皇家乐园",star:3,cat:"npc",note:"⚡展昭此时段 · Q版NPC+投壶赢交子"},
-    {id:"d1-9",t:"18:20",e:"18:55",name:"鱼灯巡游",sn:"鱼灯巡游",show:"yudeng",loc:"清明文化广场",star:4,cat:"show",prep:10,note:"⚡展昭出场拍照最美 · 看完直接转场"},
-    {id:"d1-10",t:"19:00",e:"19:35",name:"快速转场",loc:"景龙湖水面",star:0,cat:"transit",note:"往景龙湖方向 · 约5分钟"},
-    {id:"d1-11",t:"19:40",e:"20:50",name:"大宋·东京梦华",sn:"大宋·东京梦华",show:"menghua",loc:"景龙湖水面",star:5,cat:"show",ticket:1,note:"🎫70分钟水上实景大剧 · A区299元 · 购票送3天大门票(演出当天起用)"},
-    {id:"d1-12",t:"21:00",e:"21:35",name:"打铁花",sn:"打铁花",show:"tietua",loc:"九龙桥西南水面",star:5,cat:"show",prep:30,note:"8师傅城楼齐打金色火花 · 找无遮挡位"},
-    {id:"d1-13",t:"21:50",e:"22:20",name:"凤舞九天",sn:"凤舞九天",show:"fengwu",loc:"上善门城楼",star:5,cat:"show",note:"天女散花+旋转烟花 · ⚠️只东侧能看到"}
+    {id:"d1-8",t:"17:30",e:"18:15",name:"皇家乐园NPC互动",sn:"皇家乐园互动",show:"huangjia",loc:"大宋皇家乐园",star:3,cat:"npc",note:"Q版NPC+投壶赢交子 · ⚡展昭主场次=16:30巡逻与18:20鱼灯"},
+    {id:"d1-9",t:"18:20",e:"18:40",name:"鱼灯巡游",sn:"鱼灯巡游",show:"yudeng",loc:"清明文化广场",star:4,cat:"show",prep:10,note:"20分钟 · 路线清明广场→上善门 · ⚡展昭主场拍照最美 · 看完顺巡游直接往上善门方向转场"},
+    {id:"d1-10",t:"19:10",e:"19:50",name:"转场+歇脚",loc:"景龙湖水面",star:0,cat:"transit",note:"往景龙湖方向 · 约5分钟 · 可提早去占位"},
+    {id:"d1-11",t:"20:00",e:"21:10",name:"大宋·东京梦华",sn:"大宋·东京梦华",show:"menghua",loc:"景龙湖水面",star:5,cat:"show",ticket:1,note:"🎫约20:00开场·70分钟水上实景大剧 · A区299元 · 购票送3天大门票(演出当天起用) · ⚠️散场约21:10，与打铁花/凤舞九天(21:00)同时段，那两个安排在Day2二选一"}
   ]},
   {key:"d2",label:"DAY 2",date:"10/31",dow:"周六 全天",items:[
-    {id:"d2-1",t:"09:00",e:"09:35",name:"飞跃清明上河图",sn:"飞跃清明上河图",show:"feiyue",loc:"球幕影院",star:5,cat:"show",prep:45,note:"裸眼3D 8分钟 · ⚠️第一批冲排45-60分钟 · 选第4排中间"},
-    {id:"d2-2",t:"09:40",e:"10:00",name:"包公漕运",sn:"包公漕运",show:"baogong",loc:"虹桥两侧水面",star:3,cat:"show",note:"真人高空跳水 · 站桥西南岸不用上桥"},
-    {id:"d2-3",t:"10:00",e:"10:40",name:"东京保卫战",sn:"东京保卫战",show:"baowei",loc:"九龙桥西南水面",star:5,cat:"show",prep:40,note:"炮火+水柱感染力极强 · ⚠️提前40分钟 · 假山镇视角最全 · 开演前金贼在九龙桥热场可互动"},
-    {id:"d2-4",t:"10:50",e:"11:20",name:"岳飞枪挑小梁王",sn:"岳飞枪挑小梁王",show:"yuefei",loc:"大宋校场",star:3,cat:"show",prep:30,note:"看过Day1可跳过 · 东侧看台有树荫"},
-    {id:"d2-5",t:"11:40",e:"12:05",name:"宋廷梦乐",sn:"宋廷梦乐",show:"songting",loc:"宣德殿",star:3,cat:"show",prep:10,note:"现场乐器+科班舞蹈 · 室内有空调 · 座位有限提前10分钟"},
-    {id:"d2-5b",t:"11:50",e:"12:15",name:"杨门女将(上午场)",sn:"杨门女将",show:"yangmen",loc:"东京梦华舞台",star:2,cat:"show",note:"一天两场之一(下午场14:50) · 看过可跳过"},
-    {id:"d2-6",t:"12:10",e:"12:35",name:"水傀儡",sn:"水傀儡",show:"shuikui",loc:"水傀儡馆",star:3,cat:"show",note:"哪吒闹海+喷火喷水 · ⚠️场馆小往后排站"},
-    {id:"d2-7",t:"12:40",e:"13:25",name:"午饭+休息",loc:"东京食坊",star:0,cat:"food",note:"吃完歇脚"},
-    {id:"d2-8",t:"13:30",e:"14:40",name:"我在宋朝当大官",loc:"大宋皇家乐园",star:3,cat:"npc",note:"辛弃疾/李清照互动问答 · ⚠️先在浣沙溪桥领任务卡"},
-    {id:"d2-9",t:"14:50",e:"15:15",name:"杨门女将",sn:"杨门女将",show:"yangmen",loc:"东京梦华舞台",star:2,cat:"show",note:"看过可跳过不用抢位"},
-    {id:"d2-10",t:"15:00",e:"15:35",name:"龙马花车巡游",sn:"龙马花车巡游",show:"longma",loc:"丹凤门",star:3,cat:"show",prep:10,note:"丹凤门→音乐广场 · 沿主街站立 · 提前10分钟"},
-    {id:"d2-11",t:"15:40",e:"16:05",name:"五鼠闹东京",sn:"五鼠闹东京",show:"wushu",loc:"上善门城楼",star:2,cat:"show",note:"白天效果一般"},
-    {id:"d2-12",t:"16:10",e:"16:35",name:"岳飞枪挑小梁王",sn:"岳飞枪挑小梁王",show:"yuefei",loc:"大宋校场",star:3,cat:"show",prep:30,note:"校场东侧看台"},
-    {id:"d2-13",t:"16:30",e:"17:20",name:"皇家乐园(第二轮)",sn:"皇家乐园互动",show:"huangjia",loc:"大宋皇家乐园",star:4,cat:"npc",note:"⚡展昭巡逻 · 合影/互动问答 入口处"},
-    {id:"d2-3b",t:"17:20",e:"18:00",name:"东京保卫战(下午场)",sn:"东京保卫战",show:"baowei",loc:"九龙桥西南水面",star:5,cat:"show",prep:40,note:"一天两场之一 · 错过上午场可补 · ⚠️提前40分钟占位"},
-    {id:"d2-14",t:"17:30",e:"18:10",name:"斗鸡+耍猴",sn:"斗鸡+耍猴",show:"douji",loc:"大师坊/勾栏瓦肆",star:2,cat:"show",note:"民俗绝活 · 10元竞猜斗鸡 · 松弛休息"},
-    {id:"d2-15",t:"18:20",e:"18:55",name:"鱼灯巡游",sn:"鱼灯巡游",show:"yudeng",loc:"清明文化广场",star:5,cat:"show",prep:15,note:"★拍照最佳:展昭簪花郎都在 · ⚠️提前15分钟占中间 · 夜灯绝美"},
-    {id:"d2-16",t:"18:50",e:"19:40",name:"大宋百戏互动",loc:"主街",star:2,cat:"npc",note:"路边摊NPC对话 · 赢交子/闲聊"},
-    {id:"d2-17b",t:"20:10",e:"20:50",name:"岳飞·郾城大捷",sn:"岳飞·郾城大捷",show:"yancheng",loc:"大宋校场",star:5,cat:"show",prep:40,note:"夜场仅周末开演 · 比白天版更震撼 · ⚠️提前40分钟 · Day2夜场主秀"},
-    {id:"d2-18",t:"21:20",e:"21:55",name:"打铁花",sn:"打铁花",show:"tietua",loc:"九龙桥西南水面",star:5,cat:"show",prep:30,note:"临水石阶最佳"},
-    {id:"d2-19",t:"22:00",e:"22:30",name:"凤舞九天",sn:"凤舞九天",show:"fengwu",loc:"上善门城楼",star:5,cat:"show",note:"夜景威亚秀 · 只东侧可见"}
+    {id:"d2-1",t:"09:00",e:"09:35",name:"飞跃清明上河图",sn:"飞跃清明上河图",show:"feiyue",loc:"球幕影院",star:5,cat:"show",prep:45,note:"裸眼3D 8分钟 · ⚠️第一批冲排45-60分钟 · 选第4排中间 · 散场直接跑九龙桥占位"},
+    {id:"d2-3",t:"10:00",e:"10:25",name:"东京保卫战",sn:"东京保卫战",show:"baowei",loc:"九龙桥西南水面",star:5,cat:"show",prep:40,note:"25分钟 · 炮火+水柱感染力极强 · ⚠️提前40分钟 · 假山镇视角最全"},
+    {id:"d2-6",t:"11:10",e:"11:30",name:"水傀儡",sn:"水傀儡",show:"shuikui",loc:"水傀儡馆",star:3,cat:"show",note:"滚动场次11:10/12:30/13:50/15:10/16:30可补 · 哪吒闹海+喷火喷水 · ⚠️场馆小往后排站"},
+    {id:"d2-5",t:"11:40",e:"11:55",name:"宋廷梦乐",sn:"宋廷梦乐",show:"songting",loc:"宣德殿",star:3,cat:"show",prep:10,note:"15分钟 · 现场乐器+科班舞蹈 · 室内有空调 · 座位有限提前10分钟"},
+    {id:"d2-7",t:"12:00",e:"12:40",name:"午饭+休息",loc:"东京食坊",star:0,cat:"food",note:"吃完歇脚"},
+    {id:"d2-8a",t:"12:40",e:"12:55",name:"大宋招兵买马",sn:"大宋招兵买马",show:"zhaobing",loc:"四方院",star:3,cat:"npc",note:"🎤举手被选中上台互动 · 简单小游戏赢交子 · 场次09:20/12:40/14:00/17:25"},
+    {id:"d2-8",t:"13:00",e:"14:10",name:"我在宋朝当大官",sn:"皇家乐园互动",show:"huangjia",loc:"大宋皇家乐园",star:3,cat:"npc",note:"辛弃疾/李清照互动问答 · ⚠️先在浣沙溪桥领任务卡"},
+    {id:"d2-8b",t:"14:10",e:"14:50",name:"自由·赚交子/歇脚",loc:"主街",star:2,cat:"exp",note:"主街/四方院摊位补交子 · 为下午蓄力"},
+    {id:"d2-10",t:"15:00",e:"15:20",name:"龙马花车巡游",sn:"龙马花车巡游",show:"longma",loc:"丹凤门",star:3,cat:"show",prep:10,note:"20分钟 · 丹凤门→音乐广场 · 沿主街站立 · 提前10分钟"},
+    {id:"d2-13",t:"15:20",e:"16:10",name:"皇家乐园(第二轮)",sn:"皇家乐园互动",show:"huangjia",loc:"大宋皇家乐园",star:4,cat:"npc",note:"⚡辛弃疾/李清照约15:40诗词互动 · 展昭巡逻合影 入口处"},
+    {id:"d2-13b",t:"16:30",e:"16:45",name:"决战汴梁城·跟着岳飞打金贼",sn:"跟着岳飞打金贼",show:"jinzhei",loc:"上善门城楼",star:4,cat:"show",note:"15分钟 · 🎤想上台站铁链前面往前冲 · 金贼腰间银票可抢 · 男生体验感拉满"},
+    {id:"d2-3b",t:"17:20",e:"17:45",name:"东京保卫战(下午补场)",sn:"东京保卫战",show:"baowei",loc:"九龙桥西南水面",star:5,cat:"show",prep:40,note:"一天两场之一 · 仅上午错过才去 · ⚠️需提前40分钟占位，与金贼互动/皇家乐园时间冲突，二选一"},
+    {id:"d2-15",t:"18:20",e:"18:40",name:"鱼灯巡游",sn:"鱼灯巡游",show:"yudeng",loc:"清明文化广场",star:5,cat:"show",prep:15,note:"20分钟 · 路线清明广场→上善门 · ★拍照最佳:展昭簪花郎都在 · ⚠️提前15分钟占中间 · 夜灯绝美"},
+    {id:"d2-16",t:"18:50",e:"19:25",name:"大宋百戏互动",loc:"主街",star:2,cat:"npc",note:"路边摊NPC对话 · 赢交子/闲聊 · 19:30前要去校场占位"},
+    {id:"d2-17b",t:"20:10",e:"20:30",name:"岳飞·郾城大捷",sn:"岳飞·郾城大捷",show:"yancheng",loc:"大宋校场",star:5,cat:"show",prep:40,note:"20分钟 · 夜场仅周末开演 · 比白天版更震撼 · ⚠️提前40分钟 · 散场直接南下九龙桥"},
+    {id:"d2-18",t:"21:00",e:"21:15",name:"打铁花",sn:"打铁花",show:"tietua",loc:"九龙桥西南水面",star:5,cat:"show",prep:30,note:"15分钟 · 8师傅城楼齐打金色火花 · 临水石阶最佳 · ⚠️与凤舞九天同时段，二选一 · 全行程只看这一天"},
+    {id:"d2-19",t:"21:00",e:"21:10",name:"凤舞九天(与打铁花二选一)",sn:"凤舞九天",show:"fengwu",loc:"上善门城楼",star:5,cat:"show",note:"10分钟 · 天女散花+旋转烟花 · ⚠️只东侧能看到 · 与打铁花每天同时段，只能选一个"}
   ]},
   {key:"d3",label:"DAY 3",date:"11/1",dow:"周日 半天",items:[
-    {id:"d3-1",t:"09:20",e:"09:40",name:"包公漕运",sn:"包公漕运",show:"baogong",loc:"虹桥两侧水面",star:3,cat:"show",note:"虹桥西南岸"},
-    {id:"d3-2",t:"09:40",e:"10:00",name:"水傀儡",sn:"水傀儡",show:"shuikui",loc:"水傀儡馆",star:3,cat:"show",note:"没看过就补 · 场馆小往前挤"},
-    {id:"d3-3",t:"10:00",e:"10:35",name:"东京保卫战",sn:"东京保卫战",show:"baowei",loc:"九龙桥西南水面",star:3,cat:"show",prep:15,note:"看过可跳过 · 提前15分钟"},
-    {id:"d3-4",t:"10:40",e:"11:15",name:"斗鸡+耍猴",sn:"斗鸡+耍猴",show:"douji",loc:"大师坊/勾栏瓦肆",star:2,cat:"show",note:"民俗绝活 · 松弛休息"},
-    {id:"d3-4b",t:"10:50",e:"11:20",name:"岳飞枪挑小梁王(上午场)",sn:"岳飞枪挑小梁王",show:"yuefei",loc:"大宋校场",star:3,cat:"show",prep:30,note:"一天两场之一 · ⚠️提前30分钟 · 东侧看台中间靠后"},
-    {id:"d3-5",t:"11:20",e:"11:45",name:"王员外招婿",loc:"王员外家门口",star:2,cat:"npc",note:"🎤可上台互动 · ⚠️穿红衣易被选中当女婿 · 选中给很多交子+撒喜糖"},
-    {id:"d3-6",t:"11:50",e:"12:25",name:"补漏体验(飞跃/皇家乐园)",loc:"球幕影院",star:4,cat:"exp",note:"二刷球幕 · 人少体验好"},
-    {id:"d3-7",t:"12:30",e:"13:00",name:"午饭+拍照",loc:"东京食坊",star:2,cat:"food",note:"人少出片好时机"},
-    {id:"d3-8",t:"13:00",e:"15:20",name:"查漏补缺·自由逛",loc:"主街",star:2,cat:"exp",note:"逛店/补NPC/拍照"},
+    {id:"d3-1",t:"09:20",e:"09:40",name:"包公漕运",sn:"包公漕运",show:"baogong",loc:"虹桥两侧水面",star:3,cat:"show",note:"滚动场次约40分钟一班(09:20/10:00/10:40…) · 站虹桥西南岸不用上桥"},
+    {id:"d3-2",t:"09:45",e:"09:55",name:"民俗绝活",sn:"民俗绝活",show:"minsu",loc:"大师坊/勾栏瓦肆",star:2,cat:"show",note:"10分钟 · 勾栏瓦肆 · 松弛开场"},
+    {id:"d3-3",t:"10:00",e:"10:15",name:"勾栏瓦肆三连台",sn:"勾栏瓦肆三连台",show:"sanliantai",loc:"大师坊/勾栏瓦肆",star:2,cat:"show",note:"各5分钟 · 接着民俗绝活看 · 同场地不用转场"},
+    {id:"d3-4",t:"10:20",e:"11:00",name:"补漏赚交子",loc:"四方院",star:3,cat:"exp",note:"背宋词/你比划/明察秋毫补一遍 · 给当铺攒货"},
+    {id:"d3-5",t:"11:45",e:"11:55",name:"王员外招婿",sn:"王员外招婿",show:"wangyuanwai",loc:"王员外家门口",star:2,cat:"npc",note:"10分钟 · 🎤可上台 · ⚠️穿红衣易被选中当女婿 · 选中给很多交子+撒喜糖"},
+    {id:"d3-7",t:"12:00",e:"12:40",name:"午饭+拍照",loc:"东京食坊",star:2,cat:"food",note:"人少出片好时机"},
+    {id:"d3-7b",t:"12:40",e:"13:20",name:"当铺典当换交子",loc:"主街",star:3,cat:"exp",note:"全天摊 · 酒店带来的茶包/笔/小物件都能典 · 离场前清空存货"},
+    {id:"d3-8",t:"13:20",e:"15:20",name:"查漏补缺·自由逛",loc:"主街",star:2,cat:"exp",note:"逛店/补NPC/拍照 · 没遇到的隐藏NPC最后机会"},
     {id:"d3-9",t:"15:30",e:"15:45",name:"出园",loc:"迎宾门",star:0,cat:"transit",note:"迎宾门出"}
   ]}
 ];
@@ -540,6 +534,17 @@ function renderFilters(){
     box.appendChild(el);
   });
 }
+function tightRisk(it){
+  if(!it.prep) return null;
+  const day=curDay();
+  const idx=day.items.findIndex(i=>i.id===it.id);
+  if(idx<=0) return null;
+  const prev=day.items[idx-1];
+  if(!prev.e) return null;
+  const gap=toMin(it.t)-toMin(prev.e);
+  if(gap<it.prep) return {gap:gap,prep:it.prep};
+  return null;
+}
 function renderTimeline(){
   const now=nowMin();
   let items=curDay().items;
@@ -553,6 +558,7 @@ function renderTimeline(){
     const alt=st==="missed"?laterSession(it,now):null;
     const wk=wishKey(it);
     const wished=!!state.wish[wk];
+    const tr=tightRisk(it);
     html+=`<li class="item ${st==="done"?"done":""} ${st==="skipped"?"skipped":""} ${st==="missed"?"past":""} ${st==="now"?"now":""}">
       <div class="time">${it.t}</div>
       <div class="body" onclick="toggle('${it.id}')">
@@ -561,6 +567,7 @@ function renderTimeline(){
           ${st==="now"?'<span class="badge now">进行中</span>':""}
           ${st==="missed"?(alt?`<span class="badge alt">已结束 · ${alt.t} 可补场</span>`:'<span class="badge">已结束</span>'):""}
           ${st==="skipped"?'<span class="badge skip">已跳过</span>':""}
+          ${tr?`<span class="badge risk" title="上一场结束到本场开场仅${tr.gap}分钟，但建议提前${tr.prep}分钟占位，衔接过紧可能没位置">⚠️衔接紧·可能没位置</span>`:""}
           ${it.ticket?'<span class="badge">🎫购票</span>':""}
         </div>
         <div class="inote">${it.note||""}</div>
