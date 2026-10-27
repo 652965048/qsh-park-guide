@@ -162,6 +162,14 @@
   .reset.danger{background:var(--verm);color:#fff;border-color:var(--verm);font-weight:700;}
   .empty{text-align:center;color:var(--ink-soft);font-size:13px;padding:26px 10px;}
   .hint{font-size:11.5px;color:var(--ink-soft);text-align:center;margin:16px 10px 0;line-height:1.7;}
+  /* 用法速查卡（默认收起） */
+  .tipbox{background:#fbf7ee;border:1px dashed var(--line);border-radius:var(--radius);margin:16px 2px 0;overflow:hidden;}
+  .tipbox .tih{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 13px;font-size:12px;font-weight:700;color:var(--ink-soft);cursor:pointer;user-select:none;}
+  .tipbox .tih .tia{font-size:11px;color:var(--jade);font-weight:600;white-space:nowrap;}
+  .tipbox .tib{padding:1px 13px 11px;display:flex;flex-direction:column;gap:7px;}
+  .tipbox .ti{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--ink-soft);line-height:1.6;}
+  .tipbox .ti .tic{flex-shrink:0;width:18px;height:18px;border-radius:50%;background:#f0e9db;display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:1px;}
+  .tipbox .ti b{color:var(--ink);}
   .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:9px 18px;border-radius:20px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:99;white-space:nowrap;display:flex;gap:12px;align-items:center;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
   .toast .tact{color:var(--gold-soft);font-weight:700;cursor:pointer;text-decoration:underline;}
@@ -478,7 +486,7 @@ const WSS_NPC = {
     {name:"鲁智深 / 财神 / 苗疆少年", park:"万岁山", star:3, loc:"水浒街 / 各处巡游 / 仙侠区", tips:["鲁智深合影发银票","财神偶遇发银票","苗疆少年造型出片"]}
   ]
 };
-let state = { checked:{}, skipped:{}, wish:{}, wishInit:false, wishInitDual:false, wishYinsi:false, parkMode:"dual", modeDefaulted:false, dayIdx:0, view:"day", filter:"all", locOverride:null, wishSub:"wish", mustOpen:false, momentStyle:0, momentScope:"day" };
+let state = { checked:{}, skipped:{}, wish:{}, wishInit:false, wishInitDual:false, wishYinsi:false, parkMode:"dual", modeDefaulted:false, dayIdx:0, view:"day", filter:"all", locOverride:null, wishSub:"wish", mustOpen:false, momentStyle:0, momentScope:"day", tipsOpen:false, wishTipsOpen:false };
 try{ const s = JSON.parse(localStorage.getItem(LS_KEY)); if(s){ if(s.checked)state.checked=s.checked; if(s.skipped)state.skipped=s.skipped; if(s.wish)state.wish=s.wish; if(s.wishInit)state.wishInit=true; if(s.wishInitDual)state.wishInitDual=true; if(s.wishYinsi)state.wishYinsi=true; if(s.parkMode)state.parkMode=s.parkMode; if(s.modeDefaulted)state.modeDefaulted=true; } }catch(e){}
 if(!state.wishInit){ DEFAULT_WISH.forEach(k=>state.wish[k]=1); state.wishInit=true; save(); }
 if(!state.wishInitDual){ DEFAULT_WISH_DUAL.forEach(k=>state.wish[k]=1); state.wishInitDual=true; save(); }
@@ -640,23 +648,32 @@ function renderModeMeta(){
   if(t) t.textContent=dual?"⚔️ 开封逛双园 · 个人游园助手":"🏮 清明上河园 · 游园助手";
   document.title=dual?"开封逛双园 · 个人游园助手":"清明上河园 · 游园助手";
   if(s) s.textContent=dual?"清明上河园 + 万岁山武侠城 · 10.30下午入园 → 11.1傍晚收官":"各自打卡 · 智能推荐下一站 · 多场次自动补场 · 必看别错过";
-  if(h) h.innerHTML=dual
-    ? '进度只保存在<b>你自己手机</b>上，同伴之间互不影响。<br/>'
-      +'点圆圈=打卡去过 · 点「跳」=这场不去（误点再点一下即恢复）；「已跳过」汇总在下方批量恢复。<br/>'
-      +'⚔️ 顶部可切回 <b>🏮清园三天</b> 看原始单园行程，两套打卡进度各自独立记忆。<br/>'
-      +'⏰ 万岁山两大王牌（三打祝家庄/打铁花）<b>必须当天刷脸入园后</b>才能在微信/支付宝抢预约，见当天顶部预约闹钟；<b>预约到了提前15分钟检票入座即可</b>。<br/>'
-      +'🎫 东京梦华与<b>宋宴</b>二选一（都含清明3天门票+免费妆造，买其一即可）；宋宴午场已列为 D2 备选。<br/>'
-      +'🚲 跨园转场按骑共享电动车（含出园+等空车约20min缓冲）估算；🏮清明赚交子、⚔️万岁山赚银票，两园货币不通用。<br/>'
-      +'📍 位置：行程每行点📍=手动定位到那儿（推荐引擎按它算距离）；点底部位置栏可解除、恢复跟随最近打卡。<br/>'
-      +'多场次演出错过一场会自动推荐下一场；时刻以园区当天节目单为准，入园后以现场电子节目单微调。'
-    : '进度只保存在<b>你自己手机</b>上，同伴之间互不影响。<br/>'
-      +'点圆圈=打卡去过 · 点「跳」=这场不去（误点再点一下即恢复）；「已跳过」汇总在下方批量恢复。<br/>'
-      +'⭐ 必看提醒 = 我的心愿清单 ∩ 今天有场次：只提醒你在乎的。<br/>'
-      +'🎫 东京梦华与<b>宋宴</b>二选一（都含清明3天门票+免费妆造，买其一即可）；宋宴午场已列为 Day2 备选。<br/>'
-      +'多场次演出错过一场会自动推荐下一场；清空打卡需二次确认且 8 秒内可撤销。<br/>'
-      +'📍 位置：行程每行点📍=手动定位到那儿（推荐引擎按它算距离）；点底部位置栏可解除、恢复跟随最近打卡。<br/>'
-      +'时刻以园区当天节目单为准 · 坐标为园区大致方位，仅用于就近提示。';
+  if(h) h.innerHTML=tipBox(state.tipsOpen, dual?[
+    ["✅","<b>打卡</b>：圆圈=去过 ·「跳」=这场不去（再点恢复），跳过的在下方批量恢复"],
+    ["💗","<b>必看</b>=心愿清单∩今天场次；行程行点♡增删心愿"],
+    ["⏰","万岁山两王牌<b>刷脸入园后</b>抢预约，约到<b>提前15分钟检票入座</b>即可"],
+    ["🎫","梦华/宋宴<b>二选一</b>（都含3天门票+妆造）"],
+    ["📍","行程行点📍=手动定位；点底部位置栏解除"],
+    ["🔄","错过场次自动推下一场；时刻以当天节目单为准"],
+    ["🔒","进度只存<b>自己手机</b>；两种模式进度独立"]
+  ]:[
+    ["✅","<b>打卡</b>：圆圈=去过 ·「跳」=这场不去（再点恢复），跳过的在下方批量恢复"],
+    ["💗","<b>必看</b>=心愿清单∩今天场次；行程行点♡增删心愿"],
+    ["🎫","梦华/宋宴<b>二选一</b>（都含3天门票+妆造）"],
+    ["📍","行程行点📍=手动定位；点底部位置栏解除"],
+    ["🔄","错过场次自动推下一场；清空打卡二次确认+8秒可撤销"],
+    ["🔒","进度只存<b>自己手机</b>，同伴互不影响"]
+  ]);
 }
+function tipBox(open, items, header, fn){
+  fn=fn||"toggleTips";
+  return `<div class="tipbox">
+    <div class="tih" onclick="${fn}()"><span>❓ ${header||"用法速查 · 打卡/必看/预约/定位"}</span><span class="tia">${open?"收起 ▲":"展开 ▼"}</span></div>
+    ${open?`<div class="tib">${items.map(it=>`<div class="ti"><span class="tic">${it[0]}</span><div>${it[1]}</div></div>`).join("")}</div>`:""}
+  </div>`;
+}
+function toggleTips(){ state.tipsOpen=!state.tipsOpen; render(); }
+function toggleWishTips(){ state.wishTipsOpen=!state.wishTipsOpen; render(); }
 /* ⏰ 预约闹钟：仅双园模式 + 万岁山当天有预约时显示 */
 function grabToMin(g){ const m=String(g).match(/(\d{1,2}):(\d{2})/); return m?Number(m[1])*60+Number(m[2]):null; }
 function renderReserve(){
@@ -1125,13 +1142,13 @@ function renderWish(){
   wishPane.innerHTML=head+html+wishHint();
 }
 function wishHint(){
-  return '<div class="hint">'
-    +'清单贯穿三天，默认收录 4 星以上；在「DAY」页行程行点 ♡ 可增删。<br/>'
-    +'场次 chip：绿=看过 · 划线=已跳过（点按恢复）· 半透明=已结束 · 虚线=未来天。<br/>'
-    +'点任意一天的 chip = 跳过/恢复该场，用于当天或跨天微调；跳过后当天必看提醒不再催它。<br/>'
-    +'顶部子标签可切换到 🔥明星NPC / 🎤上台互动 / 🎯赚交子 / 👻隐藏NPC 指南。<br/>'
-    +'清单与进度都只保存在你自己手机上。'
-    +'</div>';
+  return tipBox(state.wishTipsOpen, [
+    ["💗","清单贯穿三天，默认收录4星以上；行程行点♡增删"],
+    ["🎟","chip：绿=看过 · 划线=跳过（点按恢复）· 半透明=已结束 · 虚线=未来天"],
+    ["✋","点当天chip=跳过/恢复该场，跨天chip仅查看"],
+    ["🧭","顶部子标签切换：明星NPC/上台互动/赚交子/隐藏NPC"],
+    ["🔒","清单与进度只存<b>自己手机</b>"]
+  ], "心愿清单用法 · chip/收藏/子标签", "toggleWishTips");
 }
 function renderSkipSummary(){
   const box=document.getElementById("skipSummary");
