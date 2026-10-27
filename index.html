@@ -297,11 +297,14 @@ const QM_DAYS = [
 ];
 
 // ===== 双园整合行程（园区模式=双园时使用）=====
-// D1 = 清明下午+夜场（复用原DAY1，独立打卡id）；D2 = 清明上午→万岁山下午夜场；D3 = 万岁山全天至18:00
+// D1 = 清明下午+夜场（复用原DAY1，独立打卡id，追加岳飞二选一的金贼互动）；D2 = 清明上午→万岁山下午夜场；D3 = 万岁山全天至18:00
 // 转场口径：骑共享电动车，含出园+等空车20分钟缓冲，清明↔万岁山约6km/骑行20-25min
+const DU1_ITEMS = QM_DAYS[0].items.map(it=>({...it,id:"du1-"+it.id.slice(3)}));
+// 双园D1追加：决战汴梁城（10.31下午已在万岁山看不了，只能在10.30与岳飞二选一）
+DU1_ITEMS.splice(7,0,{id:"du1-6b",t:"16:30",e:"16:45",name:"决战汴梁城·跟着岳飞打金贼",sn:"跟着岳飞打金贼",show:"jinzhei",loc:"上善门城楼",star:4,cat:"show",stage:1,either:1,note:"15分钟 · 🎤上台互动 · 与岳飞16:10场二选一(两地相隔较远赶不齐全)：想上台打金贼选这场、想看真马+火烧选岳飞 · 站铁链前面往前冲 · 金贼腰间银票可抢 · 清园三天模式在DAY2 16:30也有这场"});
 const DUAL_DAYS = [
   {key:"du1",label:"DAY 1",date:"10/30",dow:"周五 清明下午+夜场",park:"清明上河园",
-   items: QM_DAYS[0].items.map(it=>({...it,id:"du1-"+it.id.slice(3)}))},
+   items: DU1_ITEMS},
 
   {key:"du2",label:"DAY 2",date:"10/31",dow:"周六 清明上午→万岁山",park:"双园",items:[
     // —— 上午·清明上河园（复用原DAY2上午王牌）——
@@ -338,6 +341,7 @@ const DUAL_DAYS = [
     {id:"du3-10",t:"11:40",e:"12:20",name:"午饭（江湖食街）",loc:"江湖食街",star:0,cat:"food",note:"城寨沙场旁 · 平价"},
     {id:"du3-11",t:"13:00",e:"13:30",name:"老嫂子欢乐大舞台",sn:"老嫂子大舞台",show:"laosaozi",loc:"水浒街",star:4,cat:"show",stage:1,note:"🎤上台互动·斗舞battle · 前排蹲点 · 下午常驻"},
     {id:"du3-12",t:"13:30",e:"14:00",name:"二娘的秀",sn:"二娘的秀",show:"erniang",loc:"水浒街",star:3,cat:"show",note:"才艺表演 · 人较多 · 与老嫂子同时段二选一"},
+    {id:"du3-12b",t:"14:00",e:"14:25",name:"俏婆婆互动",sn:"俏婆婆",show:"qiaopopo",loc:"水浒街",star:4,cat:"npc",note:"🔥热门NPC · 斗舞/对唱/段子王 · 水浒街常驻、下午互动最多 · 看完14:30前去舞秀剧场占侠影位"},
     {id:"du3-13",t:"15:00",e:"15:30",name:"侠影（二刷/补场）",sn:"侠影",show:"xiaying",loc:"舞秀剧场",star:5,cat:"show",prep:30,note:"10.31已看可跳过或二刷换机位 · 月夜剑舞审美封神"},
     {id:"du3-14",t:"15:30",e:"15:50",name:"武松醉打蒋门神",sn:"武松醉打蒋门神",show:"wusong",loc:"快活林",star:4,cat:"show",note:"水浒经典打斗 · 快活林站立观看"},
     {id:"du3-15",t:"15:50",e:"16:10",name:"仙侠巡游（二刷/补场）",sn:"仙侠巡游",show:"xianxia",loc:"仙侠区",star:4,cat:"show",note:"10.31已看可跳过 · NPC造型出片"},
