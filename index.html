@@ -316,11 +316,11 @@ const DUAL_DAYS = [
     // —— 下午·万岁山 ——
     {id:"du2-9",t:"15:00",e:"15:30",name:"侠影",sn:"侠影",show:"xiaying",loc:"舞秀剧场",star:5,cat:"show",prep:30,note:"月夜剑舞审美封神 · ⚠️提前30分钟 · 排队时可同步用手机抢14:30打铁花预约"},
     {id:"du2-10",t:"15:50",e:"16:10",name:"仙侠巡游",sn:"仙侠巡游",show:"xianxia",loc:"仙侠区",star:4,cat:"show",note:"NPC造型出片率高 · 巡游路线两侧 · 和苗疆少年合影"},
-    {id:"du2-11",t:"16:20",e:"16:55",name:"三打祝家庄（进场占位）",loc:"城寨沙场",star:0,cat:"transit",note:"⚠️提前40分钟进场 · 中间偏右视野最佳 · 座CD区最居中，BE区次之"},
-    {id:"du2-12",t:"17:00",e:"17:30",name:"三打祝家庄 第二场",sn:"三打祝家庄",show:"sandazhu",loc:"城寨沙场",star:5,cat:"show",prep:40,note:"全园TOP1 · 真马冲锋+实景爆破+攻城战 · 需14:00预约17:00场 · 前排举手参与暖场赚银票"},
-    {id:"du2-13",t:"17:40",e:"18:20",name:"晚饭（江湖食街）",loc:"江湖食街",star:0,cat:"food",note:"城寨沙场旁 · 物价平价 · 快速吃完去占打铁花位"},
-    {id:"du2-14",t:"18:30",e:"19:25",name:"打铁花（进场占位）",loc:"城寨沙场",star:0,cat:"transit",note:"⚠️提前40-60分钟进场 · C区4-8排最佳 · 风华大巡游18:50与此占位冲突，打铁花5★优先"},
-    {id:"du2-15",t:"19:30",e:"19:45",name:"打铁花",sn:"打铁花(万岁山)",show:"tietua_wss",loc:"城寨沙场",star:5,cat:"show",prep:50,note:"1600℃铁水漫天绽放+开场大合唱 · 需14:30预约19:30场 · 与清明10.30九龙桥打铁花是不同园区版本 · 没约上可去神州广场看神舟铁花(免预约)"},
+    {id:"du2-11",t:"16:45",e:"17:00",name:"三打祝家庄（检票入座）",loc:"城寨沙场",star:0,cat:"transit",note:"🎫预约制 · 预约到了提前15分钟检票入座即可 · 中间偏右视野最佳 · 座CD区最居中，BE区次之"},
+    {id:"du2-12",t:"17:00",e:"17:30",name:"三打祝家庄 第二场",sn:"三打祝家庄",show:"sandazhu",loc:"城寨沙场",star:5,cat:"show",prep:15,note:"全园TOP1 · 真马冲锋+实景爆破+攻城战 · 🎫需14:00预约本场 · 预约制:提前15分钟检票入座即可,不用早到占位 · 前排举手参与暖场赚银票"},
+    {id:"du2-13",t:"17:40",e:"18:20",name:"晚饭（江湖食街）",loc:"江湖食街",star:0,cat:"food",note:"城寨沙场旁 · 物价平价 · 吃完19:15去检票即可"},
+    {id:"du2-14",t:"19:15",e:"19:30",name:"打铁花（检票入座）",loc:"城寨沙场",star:0,cat:"transit",note:"🎫预约制 · 预约到了提前15分钟检票入座即可 · C区4-8排最佳 · 风华大巡游18:50可看完再走,不冲突"},
+    {id:"du2-15",t:"19:30",e:"19:45",name:"打铁花",sn:"打铁花(万岁山)",show:"tietua_wss",loc:"城寨沙场",star:5,cat:"show",prep:15,note:"1600℃铁水漫天绽放+开场大合唱 · 🎫需14:30预约本场 · 预约制:提前15分钟检票入座即可 · 与清明10.30九龙桥打铁花是不同园区版本 · 没约上可去神州广场看神舟铁花(免预约)"},
     {id:"du2-16",t:"19:50",e:"20:10",name:"仙魔会",sn:"仙魔会",show:"xianmo",loc:"魔力广场",star:4,cat:"show",prep:15,note:"魔力广场光影秀 · ⚠️打铁花19:45散场转场魔力广场仅5分钟，衔接极紧，赶不上就直奔星河灯会"},
     {id:"du2-17",t:"20:30",e:"20:50",name:"星河灯会",sn:"星河灯会",show:"xinghe",loc:"魔力广场",star:4,cat:"show",note:"孔明灯放飞 · 魔力广场 · 万岁山特色夜场收尾"},
     {id:"du2-18",t:"21:20",e:"21:35",name:"废土狂想巡游（可选）",sn:"废土狂想巡游",show:"feitu",loc:"仙侠广场",star:3,cat:"show",note:"赛博风独特 · 体力够再看"},
@@ -336,8 +336,8 @@ const DUAL_DAYS = [
     {id:"du3-5",t:"09:35",e:"09:50",name:"李逵断案",sn:"李逵断案",show:"likui",loc:"十字坡",star:4,cat:"npc",note:"🎤可当判官上台 · 占前排举手 · E人优势赚银票"},
     {id:"du3-6",t:"09:45",e:"10:00",name:"飞云浦水上轻功",sn:"飞云浦",show:"feiyunpu",loc:"十字坡",star:4,cat:"show",note:"水上武打飘逸 · 桥两侧观看 · 与李逵断案09:35同时段，二选一或各看一半"},
     {id:"du3-7",t:"10:00",e:"10:15",name:"王婆说媒",sn:"王婆说媒",show:"wangpo",loc:"水浒街",star:3,cat:"npc",note:"即兴招婿 · 高峰提前1.5h占座 · 正好路过去看一场"},
-    {id:"du3-8",t:"10:20",e:"10:55",name:"三打祝家庄（进场占位）",loc:"城寨沙场",star:0,cat:"transit",note:"⚠️提前30-40分钟进场 · 中间偏右最佳"},
-    {id:"du3-9",t:"11:00",e:"11:30",name:"三打祝家庄 第一场",sn:"三打祝家庄",show:"sandazhu",loc:"城寨沙场",star:5,cat:"show",prep:40,note:"全园TOP1 · 需预约 · 10.31已看17:00场，这是不同时段二刷/补场 · 约不到11:00场则改14:00抢17:00加场"},
+    {id:"du3-8",t:"10:45",e:"11:00",name:"三打祝家庄（检票入座）",loc:"城寨沙场",star:0,cat:"transit",note:"🎫预约制 · 预约到了提前15分钟检票入座即可 · 中间偏右最佳"},
+    {id:"du3-9",t:"11:00",e:"11:30",name:"三打祝家庄 第一场",sn:"三打祝家庄",show:"sandazhu",loc:"城寨沙场",star:5,cat:"show",prep:15,note:"全园TOP1 · 🎫需预约 · 预约制:提前15分钟检票入座即可 · 10.31已看17:00场，这是不同时段二刷/补场 · 约不到11:00场则改14:00抢17:00加场"},
     {id:"du3-10",t:"11:40",e:"12:20",name:"午饭（江湖食街）",loc:"江湖食街",star:0,cat:"food",note:"城寨沙场旁 · 平价"},
     {id:"du3-11",t:"13:00",e:"13:30",name:"老嫂子欢乐大舞台",sn:"老嫂子大舞台",show:"laosaozi",loc:"水浒街",star:4,cat:"npc",note:"🎤斗舞battle · 前排蹲点 · 下午常驻"},
     {id:"du3-12",t:"13:30",e:"14:00",name:"二娘的秀",sn:"二娘的秀",show:"erniang",loc:"水浒街",star:3,cat:"show",note:"才艺表演 · 人较多 · 与老嫂子同时段二选一"},
@@ -345,8 +345,8 @@ const DUAL_DAYS = [
     {id:"du3-14",t:"15:30",e:"15:50",name:"武松醉打蒋门神",sn:"武松醉打蒋门神",show:"wusong",loc:"快活林",star:4,cat:"show",note:"水浒经典打斗 · 快活林站立观看"},
     {id:"du3-15",t:"15:50",e:"16:10",name:"仙侠巡游（二刷/补场）",sn:"仙侠巡游",show:"xianxia",loc:"仙侠区",star:4,cat:"show",note:"10.31已看可跳过 · NPC造型出片"},
     {id:"du3-16",t:"16:40",e:"17:00",name:"燕青打擂（二刷）",sn:"燕青打擂",show:"yanqing",loc:"十字坡",star:3,cat:"show",note:"水浒擂台真打 · 台阶前排 · 随到随看"},
-    {id:"du3-17",t:"17:00",e:"17:30",name:"三打祝家庄 第二场（补场）",sn:"三打祝家庄",show:"sandazhu",loc:"城寨沙场",star:5,cat:"show",prep:40,note:"仅上午11:00场没约到才看这场 · 需14:00预约 · 已看过则跳过"},
-    {id:"du3-18",t:"17:30",e:"17:50",name:"城北枪声（夜场）",sn:"城北枪声",show:"chengbei",loc:"影视街",star:4,cat:"show",prep:20,note:"抗日剧有爆破 · 灯光加持更沉浸 · ⚠️与三打17:00场衔接紧，二选一"},
+    {id:"du3-17",t:"17:00",e:"17:30",name:"三打祝家庄 第二场（补场）",sn:"三打祝家庄",show:"sandazhu",loc:"城寨沙场",star:5,cat:"show",prep:15,either:1,note:"仅上午11:00场没约到才看这场 · 🎫需14:00预约 · 预约制:提前15分钟检票入座即可 · 已看过则跳过 · 与城北枪声二选一"},
+    {id:"du3-18",t:"17:30",e:"17:50",name:"城北枪声（夜场）",sn:"城北枪声",show:"chengbei",loc:"影视街",star:4,cat:"show",prep:20,either:1,note:"抗日剧有爆破 · 灯光加持更沉浸 · 与三打17:00场二选一"},
     {id:"du3-19",t:"17:50",e:"18:00",name:"旗袍巡游",sn:"旗袍巡游",show:"qipao",loc:"十里洋场",star:3,cat:"show",note:"十里洋场小姐姐 · 傍晚拍照出片 · 沿途站立"},
     {id:"du3-20",t:"18:00",e:"18:15",name:"出园·行程结束",loc:"万岁山·东门",star:0,cat:"transit",note:"东门出园 · 双园三日收官"}
   ]}
@@ -365,7 +365,7 @@ const RESERVATIONS = {
 
 // 园区模式：qm=清明三天（原始），dual=双园整合
 const PARK_MODES = [
-  {key:"qm",label:"🏮 清明三天",sub:"清明上河园原行程"},
+  {key:"qm",label:"🏮 清园三天",sub:"清明上河园原行程"},
   {key:"dual",label:"⚔️ 双园整合",sub:"清明+万岁山 10.30-11.1"}
 ];
 function activeDays(){ return state.parkMode==="dual" ? DUAL_DAYS : QM_DAYS; }
@@ -435,14 +435,16 @@ const WSS_NPC = {
     {name:"鲁智深 / 财神 / 苗疆少年", park:"万岁山", star:3, loc:"水浒街 / 各处巡游 / 仙侠区", tips:["鲁智深合影发银票","财神偶遇发银票","苗疆少年造型出片"]}
   ]
 };
-let state = { checked:{}, skipped:{}, wish:{}, wishInit:false, wishInitDual:false, parkMode:"qm", dayIdx:0, view:"day", filter:"all", locOverride:null, wishSub:"wish" };
-try{ const s = JSON.parse(localStorage.getItem(LS_KEY)); if(s){ if(s.checked)state.checked=s.checked; if(s.skipped)state.skipped=s.skipped; if(s.wish)state.wish=s.wish; if(s.wishInit)state.wishInit=true; if(s.wishInitDual)state.wishInitDual=true; if(s.parkMode)state.parkMode=s.parkMode; } }catch(e){}
+let state = { checked:{}, skipped:{}, wish:{}, wishInit:false, wishInitDual:false, parkMode:"dual", modeDefaulted:false, dayIdx:0, view:"day", filter:"all", locOverride:null, wishSub:"wish" };
+try{ const s = JSON.parse(localStorage.getItem(LS_KEY)); if(s){ if(s.checked)state.checked=s.checked; if(s.skipped)state.skipped=s.skipped; if(s.wish)state.wish=s.wish; if(s.wishInit)state.wishInit=true; if(s.wishInitDual)state.wishInitDual=true; if(s.parkMode)state.parkMode=s.parkMode; if(s.modeDefaulted)state.modeDefaulted=true; } }catch(e){}
 if(!state.wishInit){ DEFAULT_WISH.forEach(k=>state.wish[k]=1); state.wishInit=true; save(); }
 if(!state.wishInitDual){ DEFAULT_WISH_DUAL.forEach(k=>state.wish[k]=1); state.wishInitDual=true; save(); }
+// 一次性迁移：老用户升级后默认落在双园整合，之后尊重手动选择
+if(!state.modeDefaulted){ state.parkMode="dual"; state.modeDefaulted=true; save(); }
 // 旧版迁移：皇家乐园互动由独立项改为剧目 huangjia
 if(state.wish["solo:d1-8"]){ delete state.wish["solo:d1-8"]; state.wish["huangjia"]=1; save(); }
 function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify({checked:state.checked,skipped:state.skipped,wish:state.wish,wishInit:state.wishInit,wishInitDual:state.wishInitDual,parkMode:state.parkMode})); }catch(e){} }
-function setParkMode(k){ if(state.parkMode===k) return; state.parkMode=k; state.locOverride=null; state.view="day"; if(state.dayIdx>=activeDays().length)state.dayIdx=0; save(); render(); toast(k==="dual"?"已切到 ⚔️双园整合":"已切到 🏮清明三天"); }
+function setParkMode(k){ if(state.parkMode===k) return; state.parkMode=k; state.locOverride=null; state.view="day"; if(state.dayIdx>=activeDays().length)state.dayIdx=0; save(); render(); toast(k==="dual"?"已切到 ⚔️双园整合":"已切到 🏮清园三天"); }
 
 function toMin(hhmm){ const [h,m]=hhmm.split(":").map(Number); return h*60+m; }
 function nowMin(){ if(window.__FAKE_NOW!=null) return window.__FAKE_NOW; const d=new Date(); return d.getHours()*60+d.getMinutes(); }
@@ -590,13 +592,13 @@ function renderModeSwitch(){
 function renderModeMeta(){
   const dual=state.parkMode==="dual";
   const t=document.getElementById("appTitle"), s=document.getElementById("appSub"), h=document.getElementById("hintBox");
-  if(t) t.textContent=dual?"⚔️ 双园整合 · 游园助手":"🏮 清明上河园 · 游园助手";
+  if(t) t.textContent=dual?"⚔️ 逛双园 · 个人游园助手":"🏮 清明上河园 · 游园助手";
   if(s) s.textContent=dual?"清明上河园 + 万岁山武侠城 · 10.30下午入园 → 11.1傍晚收官":"各自打卡 · 智能推荐下一站 · 多场次自动补场 · 必看别错过";
   if(h) h.innerHTML=dual
     ? '进度只保存在<b>你自己手机</b>上，同伴之间互不影响。<br/>'
       +'点圆圈=打卡去过 · 点「跳」=这场不去（误点再点一下即恢复）；「已跳过」汇总在下方批量恢复。<br/>'
-      +'⚔️ 顶部可切回 <b>🏮清明三天</b> 看原始单园行程，两套打卡进度各自独立记忆。<br/>'
-      +'⏰ 万岁山两大王牌（三打祝家庄/打铁花）<b>必须当天刷脸入园后</b>才能在微信/支付宝抢预约，见当天顶部预约闹钟。<br/>'
+      +'⚔️ 顶部可切回 <b>🏮清园三天</b> 看原始单园行程，两套打卡进度各自独立记忆。<br/>'
+      +'⏰ 万岁山两大王牌（三打祝家庄/打铁花）<b>必须当天刷脸入园后</b>才能在微信/支付宝抢预约，见当天顶部预约闹钟；<b>预约到了提前15分钟检票入座即可</b>。<br/>'
       +'🎫 东京梦华与<b>宋宴</b>二选一（都含清明3天门票+免费妆造，买其一即可）；宋宴午场已列为 D2 备选。<br/>'
       +'🚲 跨园转场按骑共享电动车（含出园+等空车约20min缓冲）估算；🏮清明赚交子、⚔️万岁山赚银票，两园货币不通用。<br/>'
       +'多场次演出错过一场会自动推荐下一场；时刻以园区当天节目单为准，入园后以现场电子节目单微调。'
@@ -616,7 +618,7 @@ function renderReserve(){
   if(!list.length){ box.innerHTML=""; return; }
   const now=nowMin();
   let html=`<div class="reserve"><div class="rh">⏰ 预约闹钟 · ${day.date}</div>
-    <div class="rsub">万岁山两大王牌需<b>抢预约</b>：必须<b>当天已刷脸入园</b>后，才能在微信/支付宝约。<br/>支付宝一键授权更快，微信实测卡顿，建议双渠道同抢 · 同行人身份信息提前复制 · 售罄别退出持续点可能捡漏。</div>`;
+    <div class="rsub">万岁山两大王牌需<b>抢预约</b>：必须<b>当天已刷脸入园</b>后，才能在微信/支付宝约。<br/>支付宝一键授权更快，微信实测卡顿，建议双渠道同抢 · 同行人身份信息提前复制 · 售罄别退出持续点可能捡漏。<br/>✅ <b>预约制</b>：约到后<b>提前15分钟检票入座</b>即可，不用早到占位。</div>`;
   list.forEach(r=>{
     const gm=grabToMin(r.grab);
     let cd, cdcls, hot=false, done=false;
@@ -734,13 +736,14 @@ function renderFilters(){
 }
 function tightRisk(it){
   if(!it.prep) return null;
+  if(it.either) return null; // 二选一定位的项目：与相邻项本就互斥，gap 是排序假象
   const day=curDay();
   const idx=day.items.findIndex(i=>i.id===it.id);
   if(idx<=0) return null;
   const prev0=day.items[idx-1];
   if(!prev0) return null;
-  // 上一项就是本场的占位/进场转场块（prep 时间已含在该块内）→ 不报风险
-  if(prev0.cat==="transit" && /占位|进场/.test(prev0.name)) return null;
+  // 上一项就是本场的占位/进场/检票转场块（prep 时间已含在该块内）→ 不报风险
+  if(prev0.cat==="transit" && /占位|进场|检票/.test(prev0.name)) return null;
   // 预约任务是手机操作不占人身，往前找真实上一活动
   let pi=idx-1;
   while(pi>=0 && day.items[pi].reserve) pi--;
