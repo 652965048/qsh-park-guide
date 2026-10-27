@@ -3,7 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>清明上河园 · 个人游园助手</title>
+<title>开封逛园 · 个人游园助手</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="开封逛园">
+<meta name="application-name" content="开封逛园">
+<meta name="theme-color" content="#2b2118">
 <style>
   :root{
     --ink:#2b2118; --ink-soft:#6b5d4f; --paper:#f7f1e6; --card:#fffdf8;
@@ -626,6 +635,7 @@ function renderModeMeta(){
   const dual=state.parkMode==="dual";
   const t=document.getElementById("appTitle"), s=document.getElementById("appSub"), h=document.getElementById("hintBox");
   if(t) t.textContent=dual?"⚔️ 开封逛双园 · 个人游园助手":"🏮 清明上河园 · 游园助手";
+  document.title=dual?"开封逛双园 · 个人游园助手":"清明上河园 · 游园助手";
   if(s) s.textContent=dual?"清明上河园 + 万岁山武侠城 · 10.30下午入园 → 11.1傍晚收官":"各自打卡 · 智能推荐下一站 · 多场次自动补场 · 必看别错过";
   if(h) h.innerHTML=dual
     ? '进度只保存在<b>你自己手机</b>上，同伴之间互不影响。<br/>'
