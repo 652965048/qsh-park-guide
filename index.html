@@ -61,6 +61,17 @@
   .must .mb .row span b{color:var(--ink);font-weight:600;}
   .must .mact{display:flex;gap:8px;padding:0 13px 11px;}
   .must .mact .btn{padding:6px;font-size:12px;}
+  /* 今日必看·已处理折叠区 */
+  .mustfold{background:#f4f1ec;border:1px dashed #d8d0c2;border-radius:var(--radius);margin-bottom:10px;overflow:hidden;}
+  .mustfold .mfh{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 13px;font-size:12.5px;font-weight:700;color:#7a7264;cursor:pointer;user-select:none;}
+  .mustfold .mfh .mfa{font-size:11px;font-weight:600;color:var(--jade);}
+  .mustfold .mfi{display:flex;align-items:center;gap:8px;padding:6px 13px;border-top:1px solid #e8e2d6;font-size:12.5px;}
+  .mustfold .mfi .t{font-size:10.5px;padding:2px 8px;border-radius:12px;font-weight:600;white-space:nowrap;}
+  .mustfold .mfi .t.done{background:#e9f2ec;color:var(--jade);}
+  .mustfold .mfi .t.skip{background:#e5e0d6;color:#7a7264;}
+  .mustfold .mfi .t.miss{background:#eee9e0;color:#8b8272;}
+  .mustfold .mfi .n{flex:1;color:var(--ink-soft);}
+  .mustfold .mfi .s{color:var(--gold);font-size:11px;}
   .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
   .chip{font-size:12px;padding:5px 12px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);cursor:pointer;user-select:none;}
   .chip.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
@@ -437,7 +448,7 @@ const WSS_NPC = {
     {name:"鲁智深 / 财神 / 苗疆少年", park:"万岁山", star:3, loc:"水浒街 / 各处巡游 / 仙侠区", tips:["鲁智深合影发银票","财神偶遇发银票","苗疆少年造型出片"]}
   ]
 };
-let state = { checked:{}, skipped:{}, wish:{}, wishInit:false, wishInitDual:false, wishYinsi:false, parkMode:"dual", modeDefaulted:false, dayIdx:0, view:"day", filter:"all", locOverride:null, wishSub:"wish" };
+let state = { checked:{}, skipped:{}, wish:{}, wishInit:false, wishInitDual:false, wishYinsi:false, parkMode:"dual", modeDefaulted:false, dayIdx:0, view:"day", filter:"all", locOverride:null, wishSub:"wish", mustOpen:false };
 try{ const s = JSON.parse(localStorage.getItem(LS_KEY)); if(s){ if(s.checked)state.checked=s.checked; if(s.skipped)state.skipped=s.skipped; if(s.wish)state.wish=s.wish; if(s.wishInit)state.wishInit=true; if(s.wishInitDual)state.wishInitDual=true; if(s.wishYinsi)state.wishYinsi=true; if(s.parkMode)state.parkMode=s.parkMode; if(s.modeDefaulted)state.modeDefaulted=true; } }catch(e){}
 if(!state.wishInit){ DEFAULT_WISH.forEach(k=>state.wish[k]=1); state.wishInit=true; save(); }
 if(!state.wishInitDual){ DEFAULT_WISH_DUAL.forEach(k=>state.wish[k]=1); state.wishInitDual=true; save(); }
@@ -686,47 +697,61 @@ function renderMust(){
   // 必看 = 我的心愿清单 ∩ 今天有场次（心愿是唯一主观来源）
   const groups=showGroups().filter(g=>state.wish[g.key]);
   const box=document.getElementById("mustBox");
+  const cntEl=document.getElementById("mustCnt");
   if(!groups.length){
-    document.getElementById("mustCnt").textContent="0/0";
+    cntEl.textContent="0/0";
     box.innerHTML=`<div class="empty">今天的心愿清单是空的～去「💗 心愿」页或行程行点 ♡ 收藏想看的</div>`;
     return;
   }
   const rows=[];
   groups.forEach(g=>{
     const gs=groupStatus(g,now);
-    if(gs.st==="done") rows.push({g,gs,ord:3});
-    else if(gs.st==="skipped") rows.push({g,gs,ord:4});
-    else if(gs.st==="soon") rows.push({g,gs,ord:0});
-    else if(gs.st==="wait") rows.push({g,gs,ord:1});
-    else rows.push({g,gs,ord:2});
+    // bucket: 0=进行中 1=还可看(待看/即将开场) 2=已处理沉底(已看/跳过/全错过)
+    let bucket;
+    if(gs.st==="done"||gs.st==="skipped"||gs.st==="missed") bucket=2;
+    else if(itemStatus(gs.next,now)==="now") bucket=0;
+    else bucket=1;
+    // 排序键=该出发时间（开场-建议提前占位），进行中的自然排最前
+    const dep=gs.next?toMin(gs.next.t)-(gs.next.prep||0):Infinity;
+    rows.push({g,gs,bucket,dep});
   });
-  rows.sort((a,b)=>a.ord-b.ord || b.g.maxstar-a.g.maxstar);
-  const doneN=rows.filter(r=>r.gs.st==="done").length;
-  const skipN=rows.filter(r=>r.gs.st==="skipped").length;
-  document.getElementById("mustCnt").textContent=`${doneN}/${rows.length} 已看`+(skipN?` · ${skipN} 跳过`:"");
-  const vis=rows.filter(r=>r.gs.st!=="done"&&r.gs.st!=="skipped");
-  if(!vis.length){ box.innerHTML=`<div class="empty">🎉 必看项目全部打卡 / 跳过处理完毕！</div>`; return; }
+  const active=rows.filter(r=>r.bucket<2).sort((a,b)=>a.bucket-b.bucket||a.dep-b.dep||b.g.maxstar-a.g.maxstar);
+  const sunk=rows.filter(r=>r.bucket===2);
+  const doneN=sunk.filter(r=>r.gs.st==="done").length;
+  const skipN=sunk.filter(r=>r.gs.st==="skipped").length;
+  const missN=sunk.filter(r=>r.gs.st==="missed").length;
+  cntEl.textContent=`${doneN}/${rows.length} 已看`+(skipN?` · ${skipN} 跳过`:"")+(missN?` · ${missN} 错过`:"");
   let html="";
-  vis.forEach(({g,gs})=>{
-    const tagcls=gs.st==="soon"?"soon":(gs.st==="wait"?"wait":"missed");
-    const tag=gs.st==="soon"?(itemStatus(gs.next,now)==="now"?"进行中":"即将开场"):(gs.st==="wait"?"待看":"已错过");
+  if(!active.length) html+=`<div class="empty">🎉 必看项目全部打卡 / 跳过 / 已结束，下方可展开查看处理记录！</div>`;
+  active.forEach(({g,gs})=>{
+    const tagcls=gs.st==="soon"?"soon":"wait";
+    const tag=itemStatus(gs.next,now)==="now"?"进行中":(gs.st==="soon"?"即将开场":"待看");
     const nxt=gs.next;
-    let line="";
-    if(nxt){
-      const mu=toMin(nxt.t)-now;
-      line=`<div class="row"><span>🕐 下一场 <b>${nxt.t}</b>${mu>0?` · 还有${mu>=60?Math.floor(mu/60)+"小时"+(mu%60?mu%60+"分":""):mu+"分"}`:""}</span><span>📍 ${nxt.loc}</span>${nxt.ticket?'<span>🎫 需购票</span>':""}</div><div>${nxt.note}${nxt.prep&&gs.st==="soon"&&!nxt.note.includes("提前")?` · ⚠️建议提前${nxt.prep}分钟占位`:""}</div>`;
-    } else {
-      const ss=g.sessions.map(s=>s.t).join("/");
-      line=`<div class="row"><span>🕐 今日场次 ${ss} 均已结束</span></div><div>${g.sessions[0].note}</div>`;
-    }
+    const mu=toMin(nxt.t)-now;
+    const depMu=mu-(nxt.prep||0);
+    const line=`<div class="row"><span>🕐 下一场 <b>${nxt.t}</b>${mu>0?` · 还有${mu>=60?Math.floor(mu/60)+"小时"+(mu%60?mu%60+"分":""):mu+"分"}`:""}</span><span>📍 ${nxt.loc}</span>${nxt.ticket?'<span>🎫 需购票</span>':""}</div><div>${nxt.note}${nxt.prep&&gs.st==="soon"&&!nxt.note.includes("提前")?` · ⚠️建议提前${nxt.prep}分钟占位`:``}${nxt.prep&&depMu>0&&gs.st!=="soon"?` · 🚶 约${depMu>=60?Math.floor(depMu/60)+"小时"+(depMu%60?depMu%60+"分":""):depMu+"分"}后该出发`:``}</div>`;
     const multi=g.sessions.length>1?`<div style="margin-top:4px;font-size:11px;color:#a08c6a">🎪 今日共 ${g.sessions.length} 场：${g.sessions.map(s=>s.t+(isChecked(s.id)?"✓":isSkipped(s.id)?"跳":"")).join(" · ")}</div>`:"";
     html+=`<div class="must ${tagcls}"><div class="mh"><span class="mname">${g.name}</span><span class="mstars">${stars(g.maxstar)}</span><span class="tag ${tagcls}">${tag}</span></div>
       <div class="mb">${line}${multi}</div>
-      ${nxt?`<div class="mact"><div class="btn primary" onclick="toggle('${nxt.id}')">✓ 打卡这场</div><div class="btn" onclick="skipGroup(${JSON.stringify(g.ids).replace(/"/g,"'")},true)">今天不看它</div></div>`:`<div class="mact"><div class="btn" onclick="skipGroup(${JSON.stringify(g.ids).replace(/"/g,"'")},true)">今天不看它</div></div>`}
+      <div class="mact"><div class="btn primary" onclick="toggle('${nxt.id}')">✓ 打卡这场</div><div class="btn" onclick="skipGroup(${JSON.stringify(g.ids).replace(/"/g,"'")},true)">今天不看它</div></div>
       </div>`;
   });
+  if(sunk.length){
+    html+=`<div class="mustfold${state.mustOpen?" open":""}">
+      <div class="mfh" onclick="toggleMustOpen()"><span>📦 已处理 ${sunk.length} 项（已看 ${doneN} · 跳过 ${skipN} · 错过 ${missN}）</span><span class="mfa">${state.mustOpen?"收起 ▲":"展开 ▼"}</span></div>`;
+    if(state.mustOpen){
+      const ord={done:0,skipped:1,missed:2};
+      sunk.sort((a,b)=>ord[a.gs.st]-ord[b.gs.st]||b.g.maxstar-a.g.maxstar);
+      sunk.forEach(({g,gs})=>{
+        const t=gs.st==="done"?["done","已看过"]:(gs.st==="skipped"?["skip","跳过不看"]:["miss","已错过"]);
+        html+=`<div class="mfi"><span class="t ${t[0]}">${t[1]}</span><span class="n">${g.name}</span><span class="s">${stars(g.maxstar)}</span></div>`;
+      });
+    }
+    html+=`</div>`;
+  }
   box.innerHTML=html;
 }
+function toggleMustOpen(){ state.mustOpen=!state.mustOpen; renderMust(); }
 function renderFilters(){
   const box=document.getElementById("filters"); box.innerHTML="";
   const cats=["all","show","npc","exp","food"], names={all:"全部",show:"演出",npc:"NPC",exp:"体验",food:"餐饮"};
@@ -949,7 +974,7 @@ resetBtn.onclick=()=>{
 
 render();
 setInterval(()=>{renderClock();renderReserve();renderReco();renderMust();renderTimeline();},30000);
-window.__QA={QM_DAYS,DUAL_DAYS,DAYS:QM_DAYS,state,recommend,laterSession,missedSessions,showGroups,groupStatus,itemStatus,toggle,toggleSkip,skipGroup,render,tripGroups,toggleWish,renderWish,NPC_DATA,setWishSub,RESERVATIONS,activeDays,setParkMode,
+window.__QA={QM_DAYS,DUAL_DAYS,DAYS:QM_DAYS,state,recommend,laterSession,missedSessions,showGroups,groupStatus,itemStatus,toggle,toggleSkip,skipGroup,render,tripGroups,toggleWish,renderWish,NPC_DATA,setWishSub,RESERVATIONS,activeDays,setParkMode,toggleMustOpen,renderMust,
   setDay(i){state.dayIdx=i;render();}, setMode(k){setParkMode(k);}, setNow(m){window.__FAKE_NOW=m;render();}, clearNow(){window.__FAKE_NOW=null;render();}};
 </script>
 </body>
