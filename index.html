@@ -79,6 +79,16 @@
   .moment .motxt{font-size:13px;line-height:1.85;color:var(--ink);background:#fdf9f0;border:1px dashed var(--gold-soft);border-radius:10px;padding:10px 12px;white-space:pre-wrap;margin-bottom:9px;}
   .moment .moact{display:flex;gap:8px;}
   .moment .moact .btn{padding:7px;font-size:12px;}
+  .moment .moph{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12.5px;font-weight:700;color:var(--gold);margin:2px 0 7px;}
+  .moment .molist{display:flex;flex-direction:column;gap:7px;margin-bottom:9px;}
+  .moment .moi{display:flex;gap:9px;align-items:flex-start;background:#fdf9f0;border:1px solid #f0e4c4;border-radius:10px;padding:8px 10px;}
+  .moment .moi .no{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .moment .moi .mn{font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .moment .moi .md{font-size:10px;padding:1px 7px;border-radius:10px;background:#eaf0f5;color:#5b7d99;font-weight:600;}
+  .moment .moi .mc{font-size:11px;color:var(--verm);font-weight:600;}
+  .moment .moi .mc::before{content:"「";} .moment .moi .mc::after{content:"」";}
+  .moment .moi .mt{font-size:11.5px;color:var(--ink-soft);margin-top:2px;line-height:1.6;}
+  .moment .moempty{font-size:12px;color:var(--ink-soft);background:#fdf9f0;border:1px dashed var(--gold-soft);border-radius:10px;padding:9px 11px;margin-bottom:9px;}
   .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
   .chip{font-size:12px;padding:5px 12px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);cursor:pointer;user-select:none;}
   .chip.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
@@ -384,10 +394,10 @@ const RESERVATIONS = {
   ]
 };
 
-// 园区模式：qm=清明三天（原始），dual=双园整合
+// 园区模式：qm=清明三天（原始），dual=双园合璧（默认，排左侧）
 const PARK_MODES = [
-  {key:"qm",label:"🏮 清园三天",sub:"清明上河园原行程"},
-  {key:"dual",label:"⚔️ 双园整合",sub:"清明+万岁山 10.30-11.1"}
+  {key:"dual",label:"⚔️ 双园合璧",sub:"清明+万岁山 10.30-11.1"},
+  {key:"qm",label:"🏮 清园三天",sub:"清明上河园原行程"}
 ];
 function activeDays(){ return state.parkMode==="dual" ? DUAL_DAYS : QM_DAYS; }
 
@@ -467,7 +477,7 @@ if(!state.modeDefaulted){ state.parkMode="dual"; state.modeDefaulted=true; save(
 // 旧版迁移：皇家乐园互动由独立项改为剧目 huangjia
 if(state.wish["solo:d1-8"]){ delete state.wish["solo:d1-8"]; state.wish["huangjia"]=1; save(); }
 function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify({checked:state.checked,skipped:state.skipped,wish:state.wish,wishInit:state.wishInit,wishInitDual:state.wishInitDual,wishYinsi:state.wishYinsi,parkMode:state.parkMode,modeDefaulted:state.modeDefaulted})); }catch(e){} }
-function setParkMode(k){ if(state.parkMode===k) return; state.parkMode=k; state.locOverride=null; state.view="day"; if(state.dayIdx>=activeDays().length)state.dayIdx=0; save(); render(); toast(k==="dual"?"已切到 ⚔️双园整合":"已切到 🏮清园三天"); }
+function setParkMode(k){ if(state.parkMode===k) return; state.parkMode=k; state.locOverride=null; state.view="day"; if(state.dayIdx>=activeDays().length)state.dayIdx=0; save(); render(); toast(k==="dual"?"已切到 ⚔️双园合璧":"已切到 🏮清园三天"); }
 
 function toMin(hhmm){ const [h,m]=hhmm.split(":").map(Number); return h*60+m; }
 function nowMin(){ if(window.__FAKE_NOW!=null) return window.__FAKE_NOW; const d=new Date(); return d.getHours()*60+d.getMinutes(); }
@@ -763,6 +773,45 @@ function toggleMustOpen(){ state.mustOpen=!state.mustOpen; renderMust(); }
 
 /* ===== 📸 朋友圈文案：基于当天真实打卡生成 ===== */
 const MO_STYLES=["文艺","活泼","凡尔赛"];
+// 配图建议知识库：按 show key 给「选哪张+一句话配文」（基于已打卡的演出）
+const PHOTO_TIPS={
+  menghua:{shot:"梦华水上全景",pick:"选水面灯影+舞台倒影同框那张，横图",cap:"一梦入东京"},
+  tietua:{shot:"打铁花炸开瞬间",pick:"选铁水铺满画面、有人剪影在前景的那张",cap:"1600℃的浪漫"},
+  fengwu:{shot:"凤舞九天威亚+烟花",pick:"选天女悬在半空+烟花刚炸的那帧，竖图更出片",cap:"城楼上有仙女"},
+  yudeng:{shot:"鱼灯巡游灯海",pick:"选灯龙拐弯的俯拍/斜侧那张，人脸被灯照亮最好",cap:"鱼灯游过宋朝的夜"},
+  yancheng:{shot:"郾城大捷火光",pick:"选火光映在周围人脸上那张，氛围感>清晰度",cap:"夜里的岳家军"},
+  baowei:{shot:"东京保卫战水幕",pick:"选爆炸水柱最高+战船同框那张",cap:"前排的代价是水花"},
+  feiyue:{shot:"飞跃清明上河图票根/入口",pick:"没让拍就发票根+巨幕海报合影",cap:"8分钟飞完一幅画"},
+  yuefei:{shot:"岳飞真马冲锋",pick:"选马蹄扬尘、枪尖朝前那帧连拍里最清楚的",cap:"真马，真枪，真震撼"},
+  jinzhei:{shot:"上台打金贼",pick:"首选你冲上台那张，比演出本身值得发；没有就发抢到的银票",cap:"今天我是宋朝兵王"},
+  wangyuanwai:{shot:"王员外绣球",pick:"被选中就发接绣球瞬间；没中选发抛球满场手的那张",cap:"红衣的代价"},
+  shuikui:{shot:"水傀儡喷火",pick:"选喷火+水花同帧那张，场馆小俯拍角度最好",cap:"小场馆里的大哪吒"},
+  huangjia:{shot:"皇家乐园NPC合影",pick:"选和Q版NPC互动的抓拍，加一张交子战利品摆拍",cap:"在宋朝赚到了第一桶金"},
+  songyan:{shot:"宋宴菜+演出同框",pick:"选'一道菜+对应表演'同框那张；妆造人像单独发第二张",cap:"吃一顿饭看八场戏"},
+  sandazhu:{shot:"三打祝家庄攻城",pick:"选真马冲锋+爆破同框那帧；检票后拍的空场全景可作第二张",cap:"全园TOP1名不虚传"},
+  tietua_wss:{shot:"万岁山打铁花",pick:"选铁水漫天+观众手机灯海同框那张（大合唱时拍）",cap:"万人合唱里的铁花"},
+  xiaying:{shot:"侠影剑舞剪影",pick:"选暗场里剑光轨迹+舞者剪影那张，别选开闪光灯的",cap:"月夜有一场剑舞"},
+  xianxia:{shot:"仙侠巡游造型",pick:"选苗疆少年/主NPC全身造型平拍那张",cap:"巡游队伍里全是神仙"},
+  yinsi:{shot:"银丝古建",pick:"选傍晚光线下的建筑线条那张；上课偷吃/枕头大战抓拍作花絮",cap:"东门旁的银丝世界"},
+  qiaopopo:{shot:"俏婆婆互动",pick:"选她甩段子/斗舞的表情抓拍，互动感>摆拍",cap:"水浒街段子王"},
+  likui:{shot:"上台当判官",pick:"选你拍案/举判词牌那张，台下视角最好",cap:"今天判了个案子"},
+  laosaozi:{shot:"老嫂子斗舞",pick:"选battle双方对峙瞬间那张，表情是重点",cap:"大宋街舞总决赛"},
+  gouhuo:{shot:"篝火舞手拉手",pick:"站圈外拍环形火光+人群剪影那张",cap:"全场手拉手的夜晚"},
+  xinghe:{shot:"星河灯会孔明灯",pick:"选灯刚升空、天空还有余晖那张",cap:"把愿望放上天"},
+  xianmo:{shot:"仙魔会光影",pick:"选光影打在脸上、背景是投影的那张人像",cap:"魔力广场的光"}
+};
+function photoPicks(scope,dayIdx){
+  const picks=[];
+  if(scope==="trip"){
+    activeDays().forEach((d,di)=>{ dayMomentData(di).done.forEach(it=>{ if(it.show&&PHOTO_TIPS[it.show]) picks.push({...PHOTO_TIPS[it.show],day:d.date}); }); });
+  }else{
+    dayMomentData(dayIdx).done.forEach(it=>{ if(it.show&&PHOTO_TIPS[it.show]) picks.push({...PHOTO_TIPS[it.show],day:null}); });
+  }
+  // 去重同名
+  const seen={}; const out=[];
+  picks.forEach(p=>{ if(!seen[p.shot]){ seen[p.shot]=1; out.push(p); } });
+  return out;
+}
 function dayMomentData(dayIdx){
   const d=activeDays()[dayIdx]; if(!d) return null;
   const items=d.items.filter(it=>it.cat!=="transit");
@@ -861,14 +910,31 @@ function renderMoment(){
   const si=state.momentStyle||0;
   const txt=scope==="trip"?buildTripMoment(si):buildMoment(dayIdx,si);
   state._momentText=txt;
+  const picks=photoPicks(scope,dayIdx);
+  state._photoText=picks.length?picks.map((p,i)=>(i+1)+". "+p.shot+(p.day?"（"+p.day+"）":"")+"｜选片："+p.pick+"｜配文："+p.cap).join("\n"):"";
   const chips=MO_STYLES.map((s,i)=>`<span class="schip ${i===si?"done":""}" style="cursor:pointer" onclick="setMomentStyle(${i})">${s}</span>`).join(" ");
   const scopeChips=canTrip?`<span class="schip ${scope==="day"?"done":""}" style="cursor:pointer" onclick="setMomentScope('day')">当日</span> <span class="schip ${scope==="trip"?"done":""}" style="cursor:pointer" onclick="setMomentScope('trip')">三日收官</span> · `:"";
+  let photoHtml="";
+  if(picks.length){
+    photoHtml=`<div class="moph"><span>📷 配图建议 · 按你的打卡挑了 ${Math.min(picks.length,6)} 张</span>${picks.length>6?`<span style="font-weight:400;color:#a08c6a">（共${picks.length}个，展示前6）</span>`:""}</div>
+      <div class="molist">${picks.slice(0,6).map((p,i)=>`<div class="moi"><span class="no">${i+1}</span><div><div class="mn">${p.shot}${p.day?`<span class="md">${p.day}</span>`:""}<span class="mc">${p.cap}</span></div><div class="mt">选片：${p.pick}</div></div></div>`).join("")}</div>`;
+  }else{
+    photoHtml=`<div class="moph"><span>📷 配图建议</span></div><div class="moempty">今天还没打卡演出类项目～打过卡后这里会告诉你哪几张最值得发。</div>`;
+  }
   box.innerHTML=`<div class="moment">
     <div class="moh">📸 朋友圈文案 · ${scope==="trip"?"开封三日收官":m.d.label}</div>
     <div class="mostyle">${scopeChips}风格：${chips}<br/>${scope==="trip"?"汇总三天全部打卡":(dayOver?"今日行程已结束，文案已按你的打卡生成":"行程进行中，文案会随打卡实时更新")}</div>
     <div class="motxt">${txt.replace(/</g,"&lt;")}</div>
-    <div class="moact"><div class="btn primary" onclick="copyMoment()">📋 复制文案</div><div class="btn" onclick="setMomentStyle(${(si+1)%3})"> 换个风格</div></div>
+    ${photoHtml}
+    <div class="moact"><div class="btn primary" onclick="copyMoment()">📋 复制文案</div><div class="btn" onclick="copyPhoto()">📷 复制配图建议</div><div class="btn" onclick="setMomentStyle(${(si+1)%3})"> 换风格</div></div>
   </div>`;
+}
+function copyPhoto(){
+  const txt=(state._photoText||"");
+  if(!txt){ toast("今天还没有可推荐的配图点位"); return; }
+  const done=()=>toast("配图建议已复制");
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done,()=>fallbackCopy(txt,done)); }
+  else fallbackCopy(txt,done);
 }
 function renderFilters(){
   const box=document.getElementById("filters"); box.innerHTML="";
