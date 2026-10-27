@@ -126,6 +126,9 @@
   .item .chk{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;background:#fff;transition:.15s;}
   .item.done .chk{background:var(--jade);border-color:var(--jade);}
   .skipbtn{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);background:#fff;color:#a89e8e;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;line-height:1;}
+  .locbtn{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;line-height:1;transition:.15s;}
+  .locbtn:active{transform:scale(.9);}
+  .locbtn.on{background:var(--verm);border-color:var(--verm);}
   .item.skipped .skipbtn{background:#8b8272;color:#fff;border-color:#8b8272;}
   .skipbox{background:#f4f1ec;border:1px dashed #d8d0c2;border-radius:var(--radius);padding:11px 13px;}
   .skipbox .sh{font-size:12.5px;font-weight:700;color:#7a7264;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;}
@@ -644,12 +647,14 @@ function renderModeMeta(){
       +'⏰ 万岁山两大王牌（三打祝家庄/打铁花）<b>必须当天刷脸入园后</b>才能在微信/支付宝抢预约，见当天顶部预约闹钟；<b>预约到了提前15分钟检票入座即可</b>。<br/>'
       +'🎫 东京梦华与<b>宋宴</b>二选一（都含清明3天门票+免费妆造，买其一即可）；宋宴午场已列为 D2 备选。<br/>'
       +'🚲 跨园转场按骑共享电动车（含出园+等空车约20min缓冲）估算；🏮清明赚交子、⚔️万岁山赚银票，两园货币不通用。<br/>'
+      +'📍 位置：行程每行点📍=手动定位到那儿（推荐引擎按它算距离）；点底部位置栏可解除、恢复跟随最近打卡。<br/>'
       +'多场次演出错过一场会自动推荐下一场；时刻以园区当天节目单为准，入园后以现场电子节目单微调。'
     : '进度只保存在<b>你自己手机</b>上，同伴之间互不影响。<br/>'
       +'点圆圈=打卡去过 · 点「跳」=这场不去（误点再点一下即恢复）；「已跳过」汇总在下方批量恢复。<br/>'
       +'⭐ 必看提醒 = 我的心愿清单 ∩ 今天有场次：只提醒你在乎的。<br/>'
       +'🎫 东京梦华与<b>宋宴</b>二选一（都含清明3天门票+免费妆造，买其一即可）；宋宴午场已列为 Day2 备选。<br/>'
       +'多场次演出错过一场会自动推荐下一场；清空打卡需二次确认且 8 秒内可撤销。<br/>'
+      +'📍 位置：行程每行点📍=手动定位到那儿（推荐引擎按它算距离）；点底部位置栏可解除、恢复跟随最近打卡。<br/>'
       +'时刻以园区当天节目单为准 · 坐标为园区大致方位，仅用于就近提示。';
 }
 /* ⏰ 预约闹钟：仅双园模式 + 万岁山当天有预约时显示 */
@@ -1007,6 +1012,7 @@ function renderTimeline(){
       </div>
       <div class="acts">
         <div class="hbtn ${wished?"on":""}" title="${wished?"从心愿清单移除":"加入心愿清单"}" onclick="toggleWish('${wk}')">${wished?"♥":"♡"}</div>
+        <div class="locbtn ${state.locOverride===it.loc?"on":""}" title="${state.locOverride===it.loc?"当前手动定位在此 · 点底部位置栏可解除":"把当前位置设到「"+it.loc+"」（推荐引擎按此算距离）"}" onclick="locateAt('${it.loc}')">📍</div>
         <div class="skipbtn" title="${st==="skipped"?"撤销跳过":"标记这场跳过"}" onclick="toggleSkip('${it.id}')">跳</div>
         <div class="chk" onclick="toggle('${it.id}')">${st==="done"?"✓":""}</div>
       </div>
@@ -1142,9 +1148,16 @@ function renderProgress(){
   const pct=act.length?Math.round(done/act.length*100):0;
   document.getElementById("progfill").style.width=pct+"%";
   document.getElementById("progtxt").textContent=`今日 ${done} / ${act.length}`+(skipN?` · 跳过${skipN}`:"");
-  document.getElementById("locTxt").textContent=`📍 ${currentLoc()}`;
+  document.getElementById("locTxt").textContent=state.locOverride?`📍 ${currentLoc()}（手动·点解除）`:`📍 ${currentLoc()}`;
+  document.getElementById("locTxt").onclick=state.locOverride?clearLoc:null;
+  document.getElementById("locTxt").style.cursor=state.locOverride?"pointer":"default";
+  document.getElementById("locTxt").style.textDecoration=state.locOverride?"underline":"none";
 }
-function locateAt(loc){ state.locOverride=loc; render(); toast("已定位到 "+loc); }
+function locateAt(loc){
+  if(state.locOverride===loc){ clearLoc(); return; }
+  state.locOverride=loc; render(); toast("已定位到 "+loc+" · 点底部位置栏可解除");
+}
+function clearLoc(){ state.locOverride=null; render(); toast("已解除手动定位，恢复跟随最近打卡"); }
 function render(){
   renderClock();renderModeMeta();renderModeSwitch();renderTabs();renderViewSwitch();renderProgress();renderReserve();
   const reco=renderReco();renderGap(reco);renderMust();renderWish();renderFilters();renderTimeline();renderSkipSummary();renderMoment();
