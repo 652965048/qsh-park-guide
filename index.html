@@ -72,6 +72,13 @@
   .mustfold .mfi .t.miss{background:#eee9e0;color:#8b8272;}
   .mustfold .mfi .n{flex:1;color:var(--ink-soft);}
   .mustfold .mfi .s{color:var(--gold);font-size:11px;}
+  /* 朋友圈文案卡片 */
+  .moment{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px;border-left:4px solid var(--gold);}
+  .moment .moh{font-size:14px;font-weight:800;color:var(--gold);margin-bottom:5px;}
+  .moment .mostyle{font-size:11px;color:var(--ink-soft);margin-bottom:7px;}
+  .moment .motxt{font-size:13px;line-height:1.85;color:var(--ink);background:#fdf9f0;border:1px dashed var(--gold-soft);border-radius:10px;padding:10px 12px;white-space:pre-wrap;margin-bottom:9px;}
+  .moment .moact{display:flex;gap:8px;}
+  .moment .moact .btn{padding:7px;font-size:12px;}
   .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
   .chip{font-size:12px;padding:5px 12px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);cursor:pointer;user-select:none;}
   .chip.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
@@ -212,6 +219,7 @@
     <div class="filters" id="filters"></div>
     <ul class="tl" id="timeline"></ul>
     <div id="skipSummary" style="margin-top:14px"></div>
+    <div id="momentBox" style="margin-top:14px"></div>
     <div class="hint" id="hintBox">
       进度只保存在<b>你自己手机</b>上，同伴之间互不影响。<br/>
       点圆圈=打卡去过 · 点「跳」=这场不去（误点再点一下即恢复）；「已跳过」汇总在下方批量恢复。<br/>
@@ -448,7 +456,7 @@ const WSS_NPC = {
     {name:"鲁智深 / 财神 / 苗疆少年", park:"万岁山", star:3, loc:"水浒街 / 各处巡游 / 仙侠区", tips:["鲁智深合影发银票","财神偶遇发银票","苗疆少年造型出片"]}
   ]
 };
-let state = { checked:{}, skipped:{}, wish:{}, wishInit:false, wishInitDual:false, wishYinsi:false, parkMode:"dual", modeDefaulted:false, dayIdx:0, view:"day", filter:"all", locOverride:null, wishSub:"wish", mustOpen:false };
+let state = { checked:{}, skipped:{}, wish:{}, wishInit:false, wishInitDual:false, wishYinsi:false, parkMode:"dual", modeDefaulted:false, dayIdx:0, view:"day", filter:"all", locOverride:null, wishSub:"wish", mustOpen:false, momentStyle:0, momentScope:"day" };
 try{ const s = JSON.parse(localStorage.getItem(LS_KEY)); if(s){ if(s.checked)state.checked=s.checked; if(s.skipped)state.skipped=s.skipped; if(s.wish)state.wish=s.wish; if(s.wishInit)state.wishInit=true; if(s.wishInitDual)state.wishInitDual=true; if(s.wishYinsi)state.wishYinsi=true; if(s.parkMode)state.parkMode=s.parkMode; if(s.modeDefaulted)state.modeDefaulted=true; } }catch(e){}
 if(!state.wishInit){ DEFAULT_WISH.forEach(k=>state.wish[k]=1); state.wishInit=true; save(); }
 if(!state.wishInitDual){ DEFAULT_WISH_DUAL.forEach(k=>state.wish[k]=1); state.wishInitDual=true; save(); }
@@ -607,7 +615,7 @@ function renderModeSwitch(){
 function renderModeMeta(){
   const dual=state.parkMode==="dual";
   const t=document.getElementById("appTitle"), s=document.getElementById("appSub"), h=document.getElementById("hintBox");
-  if(t) t.textContent=dual?"⚔️ 逛双园 · 个人游园助手":"🏮 清明上河园 · 游园助手";
+  if(t) t.textContent=dual?"⚔️ 开封逛双园 · 个人游园助手":"🏮 清明上河园 · 游园助手";
   if(s) s.textContent=dual?"清明上河园 + 万岁山武侠城 · 10.30下午入园 → 11.1傍晚收官":"各自打卡 · 智能推荐下一站 · 多场次自动补场 · 必看别错过";
   if(h) h.innerHTML=dual
     ? '进度只保存在<b>你自己手机</b>上，同伴之间互不影响。<br/>'
@@ -752,6 +760,116 @@ function renderMust(){
   box.innerHTML=html;
 }
 function toggleMustOpen(){ state.mustOpen=!state.mustOpen; renderMust(); }
+
+/* ===== 📸 朋友圈文案：基于当天真实打卡生成 ===== */
+const MO_STYLES=["文艺","活泼","凡尔赛"];
+function dayMomentData(dayIdx){
+  const d=activeDays()[dayIdx]; if(!d) return null;
+  const items=d.items.filter(it=>it.cat!=="transit");
+  const done=items.filter(it=>isChecked(it.id));
+  const skipped=items.filter(it=>isSkipped(it.id));
+  const missed=items.filter(it=>!isChecked(it.id)&&!isSkipped(it.id)&&toMin(it.e)<toMin(d.items[d.items.length-1].e)&&it.cat!=="food");
+  const stars5=done.filter(it=>it.star>=5);
+  const stage=done.filter(it=>it.stage);
+  const wishG=tripGroups().filter(g=>state.wish[g.key]);
+  const wishDone=wishG.filter(g=>g.sessions.some(s=>isChecked(s.id))).length;
+  return {d,done,skipped,missed,stars5,stage,wishN:wishG.length,wishDone};
+}
+function buildMoment(dayIdx,styleIdx){
+  const m=dayMomentData(dayIdx); if(!m) return "";
+  const {d,done,skipped,missed,stars5,stage,wishN,wishDone}=m;
+  const names=done.map(it=>it.name);
+  const top=stars5.map(it=>it.name);
+  const park=d.park||"清明上河园";
+  const dn=d.date;
+  const n=done.length;
+  if(styleIdx===0){ // 文艺
+    let t=`${dn} · ${park}\n`;
+    if(top.length) t+=`把一天过成了宋朝：${top.slice(0,3).join("、")}。\n`;
+    else if(n) t+=`从${names[0]}到${names[n-1]}，一天走了${n}站。\n`;
+    else t+=`今天只是路过开封，风里有汴河的味道。\n`;
+    if(stage.length) t+=`还被拉上了台，${stage[0]}里我是那个最入戏的观众。\n`;
+    t+=`心愿清单 ${wishDone}/${wishN}，剩下的留给明天。`;
+    return t;
+  }
+  if(styleIdx===1){ // 活泼
+    let t=`🏮${dn} ${park}打卡 ${n} 项！\n`;
+    t+= top.length?`⭐名场面：${top.slice(0,3).join("→")}！\n`:`✨小众但真香的一天～\n`;
+    if(stage.length) t+=`🎤上台成就达成：${stage.map(s=>s.name).slice(0,2).join("、")}，E人狂喜！\n`;
+    if(skipped.length) t+=`主动放弃${skipped.length}项，腿比心愿诚实。\n`;
+    t+=`💗心愿进度 ${wishDone}/${wishN}，明天继续冲！`;
+    return t;
+  }
+  // 凡尔赛
+  let t=`也就在${park}随便逛了逛，${dn}一天打卡${n}项而已。\n`;
+  t+= top.length?`顺便把${top.slice(0,2).join("和")}看了，排队？不存在的，我们有攻略。\n`:`别人赶场我们随缘，松弛感这块拿捏了。\n`;
+  if(stage.length) t+=`上台互动这种事，被选中也不是第一次了（${stage[0]}）。\n`;
+  t+=`心愿清单还差${Math.max(0,wishN-wishDone)}个，主要是园子太大，不是我不行。`;
+  return t;
+}
+function setMomentStyle(i){ state.momentStyle=i; renderMoment(); }
+function setMomentScope(s){ state.momentScope=s; renderMoment(); }
+function buildTripMoment(styleIdx){
+  const days=activeDays();
+  let all=[],stars5=[],stage=[];
+  days.forEach((d,di)=>{ const m=dayMomentData(di); if(!m)return; all=all.concat(m.done.map(it=>({...it,di}))); stars5=stars5.concat(m.stars5.map(it=>({...it,di}))); stage=stage.concat(m.stage.map(it=>({...it,di}))); });
+  const wishG=tripGroups().filter(g=>state.wish[g.key]);
+  const wishDone=wishG.filter(g=>g.sessions.some(s=>isChecked(s.id))).length;
+  const n=all.length;
+  if(styleIdx===0){
+    let t=`开封三日 · 清明上河园+万岁山\n从汴河的鱼灯到城寨沙场的铁花，${n}次打卡，把三天过成了一卷清明上河图。\n`;
+    t+= stars5.length?`最难忘：${stars5.slice(0,4).map(s=>s.name).join("、")}。\n`:"";
+    if(stage.length) t+=`还在${stage[0].name}里当了一回宋朝人。\n`;
+    t+=`心愿 ${wishDone}/${wishG.length}，没走完的路，是留给下一次的请柬。`;
+    return t;
+  }
+  if(styleIdx===1){
+    let t=`🏮⚔️开封双园三日通关！打卡${n}项！\n`;
+    t+= stars5.length?`⭐名场面合集：${stars5.slice(0,4).map(s=>s.name).join("→")}！\n`:"";
+    if(stage.length) t+=`🎤上台${stage.length}次：${stage.map(s=>s.name).slice(0,2).join("、")}，E人毕业！\n`;
+    t+=`💗心愿 ${wishDone}/${wishG.length} · 腿已废，心还想再刷三天！`;
+    return t;
+  }
+  let t=`也就在开封随便玩了三天，双园打卡${n}项而已。\n`;
+  t+= stars5.length?`${stars5.slice(0,2).map(s=>s.name).join("和")}这种级别的说看就看了，攻略在手，排队绕走。\n`:"";
+  if(stage.length) t+=`上台互动被选中这种事，习惯了（${stage[0].name}）。\n`;
+  t+=`心愿还差${Math.max(0,wishG.length-wishDone)}个没完成——主要是三天太短，不是我不行。`;
+  return t;
+}
+function copyMoment(){
+  const txt=(state._momentText||"");
+  const done=()=>toast("已复制，去朋友圈粘贴吧");
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done,()=>fallbackCopy(txt,done)); }
+  else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,done){
+  try{ const ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta); done(); }catch(e){ toast("复制失败，长按文案手动复制"); }
+}
+function renderMoment(){
+  const box=document.getElementById("momentBox"); if(!box) return;
+  const dayIdx=state.dayIdx;
+  const m=dayMomentData(dayIdx); if(!m){ box.innerHTML=""; return; }
+  const now=nowMin();
+  const lastEnd=toMin(m.d.items[m.d.items.length-1].e);
+  const dayOver=now>=lastEnd||now<9*60; // 当天行程已结束，或已是次日凌晨
+  const isLastDay=dayIdx===activeDays().length-1;
+  // 收官文案：最后一天或三天都结束时可选
+  const tripOver=activeDays().every((d,di)=>{ const mm=dayMomentData(di); return !mm||now>=toMin(d.items[d.items.length-1].e); });
+  const canTrip=isLastDay||tripOver;
+  if(canTrip && !state.momentScope) state.momentScope="day";
+  const scope=canTrip?(state.momentScope||"day"):"day";
+  const si=state.momentStyle||0;
+  const txt=scope==="trip"?buildTripMoment(si):buildMoment(dayIdx,si);
+  state._momentText=txt;
+  const chips=MO_STYLES.map((s,i)=>`<span class="schip ${i===si?"done":""}" style="cursor:pointer" onclick="setMomentStyle(${i})">${s}</span>`).join(" ");
+  const scopeChips=canTrip?`<span class="schip ${scope==="day"?"done":""}" style="cursor:pointer" onclick="setMomentScope('day')">当日</span> <span class="schip ${scope==="trip"?"done":""}" style="cursor:pointer" onclick="setMomentScope('trip')">三日收官</span> · `:"";
+  box.innerHTML=`<div class="moment">
+    <div class="moh">📸 朋友圈文案 · ${scope==="trip"?"开封三日收官":m.d.label}</div>
+    <div class="mostyle">${scopeChips}风格：${chips}<br/>${scope==="trip"?"汇总三天全部打卡":(dayOver?"今日行程已结束，文案已按你的打卡生成":"行程进行中，文案会随打卡实时更新")}</div>
+    <div class="motxt">${txt.replace(/</g,"&lt;")}</div>
+    <div class="moact"><div class="btn primary" onclick="copyMoment()">📋 复制文案</div><div class="btn" onclick="setMomentStyle(${(si+1)%3})"> 换个风格</div></div>
+  </div>`;
+}
 function renderFilters(){
   const box=document.getElementById("filters"); box.innerHTML="";
   const cats=["all","show","npc","exp","food"], names={all:"全部",show:"演出",npc:"NPC",exp:"体验",food:"餐饮"};
@@ -953,7 +1071,7 @@ function renderProgress(){
 function locateAt(loc){ state.locOverride=loc; render(); toast("已定位到 "+loc); }
 function render(){
   renderClock();renderModeMeta();renderModeSwitch();renderTabs();renderViewSwitch();renderProgress();renderReserve();
-  const reco=renderReco();renderGap(reco);renderMust();renderWish();renderFilters();renderTimeline();renderSkipSummary();
+  const reco=renderReco();renderGap(reco);renderMust();renderWish();renderFilters();renderTimeline();renderSkipSummary();renderMoment();
 }
 
 /* 清空：二次确认 + 8秒撤销 */
@@ -974,7 +1092,7 @@ resetBtn.onclick=()=>{
 
 render();
 setInterval(()=>{renderClock();renderReserve();renderReco();renderMust();renderTimeline();},30000);
-window.__QA={QM_DAYS,DUAL_DAYS,DAYS:QM_DAYS,state,recommend,laterSession,missedSessions,showGroups,groupStatus,itemStatus,toggle,toggleSkip,skipGroup,render,tripGroups,toggleWish,renderWish,NPC_DATA,setWishSub,RESERVATIONS,activeDays,setParkMode,toggleMustOpen,renderMust,
+window.__QA={QM_DAYS,DUAL_DAYS,DAYS:QM_DAYS,state,recommend,laterSession,missedSessions,showGroups,groupStatus,itemStatus,toggle,toggleSkip,skipGroup,render,tripGroups,toggleWish,renderWish,NPC_DATA,setWishSub,RESERVATIONS,activeDays,setParkMode,toggleMustOpen,renderMust,buildMoment,buildTripMoment,dayMomentData,
   setDay(i){state.dayIdx=i;render();}, setMode(k){setParkMode(k);}, setNow(m){window.__FAKE_NOW=m;render();}, clearNow(){window.__FAKE_NOW=null;render();}};
 </script>
 </body>
